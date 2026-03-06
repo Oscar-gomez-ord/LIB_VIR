@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookFlow CRM — Librería Virtual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #ec4899;
+            --text: #1e293b;
+            --text-soft: #64748b;
+            --border: #e2e8f0;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Layout */
+        .app-container { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { background: #0f172a; color: white; padding: 24px; display: flex; flex-direction: column; gap: 8px; }
+        .logo { font-weight: 800; font-size: 22px; margin-bottom: 32px; display: flex; align-items: center; gap: 10px; }
+        .nav-btn { 
+            padding: 12px 16px; border-radius: var(--radius); border: none; background: transparent; 
+            color: #94a3b8; text-align: left; cursor: pointer; font-weight: 600; transition: 0.2s;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-btn.active { background: var(--primary); color: white; }
+
+        /* Main Content */
+        .main-content { padding: 32px; overflow-y: auto; max-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .view { display: none; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards & Tables */
+        .card { background: var(--surface); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th { text-align: left; padding: 12px; color: var(--text-soft); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+        td { padding: 16px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+        /* Status Badges */
+        .badge { padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+        .badge-debt { background: #fee2e2; color: #b91c1c; }
+        .badge-paid { background: #dcfce7; color: #15803d; }
+
+        /* Forms */
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-soft); }
+        input, select, textarea { 
+            width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); 
+            font-family: inherit; font-size: 14px; outline: none; transition: 0.2s;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+
+        .btn { 
+            padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; 
+            transition: 0.2s; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+        /* Mini Dashboard en Cliente */
+        .client-stats { display: flex; gap: 16px; margin-bottom: 20px; }
+        .stat-box { flex: 1; padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
+        .stat-val { font-size: 20px; font-weight: 800; display: block; }
+        .stat-lbl { font-size: 12px; color: var(--text-soft); }
+
+        /* Screenshot Preview */
+        .img-preview { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; }
+
+        /* Modal */
+        .modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; 
+            align-items: center; justify-content: center; z-index: 100; padding: 20px;
+        }
+        .modal-content { background: white; padding: 32px; border-radius: var(--radius); width: 100%; max-width: 500px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="logo">📚 BookFlow</div>
+            <nav style="flex: 1">
+                <button class="nav-btn active" onclick="switchView('clients')">👥 Lista de Clientes</button>
+                <button class="nav-btn" onclick="switchView('sales')">💰 Registrar Venta</button>
+                <button class="nav-btn" onclick="switchView('providers')">🏠 Visita Proveedores</button>
+                <button class="nav-btn" onclick="switchView('admin-view')" id="admin-nav" style="display:none">📊 Panel Admin</button>
+            </nav>
+            <div style="padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1)">
+                <div id="user-info" style="font-size: 13px; margin-bottom: 10px; color: #94a3b8;">User: <span id="current-username" style="color: white">Cajero</span></div>
+                <button class="btn btn-outline" style="width: 100%; color: white" onclick="toggleRole()">Cambiar Rol (Sim)</button>
+            </div>
+        </div>
+
+        <main class="main-content">
+            
+            <section id="view-clients" class="view active">
+                <div class="header">
+                    <h2>Clientes & Acumulados</h2>
+                    <button class="btn btn-primary" onclick="openModal('modal-client')">+ Nuevo Cliente</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Acumulado Total</th>
+                                <th>Pagado</th>
+                                <th>Resta</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-table">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="view-sales" class="view">
+                <div class="header">
+                    <h2>Nueva Venta / Abono</h2>
+                </div>
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <form id="sale-form">
+                        <div class="form-group">
+                            <label>Seleccionar Cliente</label>
+                            <select id="sale-client-select" required></select>
+                        </div>
+                        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                            <div class="form-group">
+                                <label>Monto de la Compra ($)</label>
+                                <input type="number" id="sale-amount" placeholder="0.00" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Abono Actual ($)</label>
+                                <input type="number" id="sale-payment" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Comprobante (Screenshot)</label>
+                            <input type="file" id="sale-screenshot" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <label>Paquetería de su agrado</label>
+                            <input type="text" id="sale-courier" placeholder="Ej: DHL, Estafeta, Correos...">
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección de Envío</label>
+                            <textarea id="sale-address" rows="2" placeholder="Calle, número, colonia, CP..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%">Registrar en Acumulado</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="view-providers" class="view">
+                <div class="header">
+                    <h2>Agenda de Visitas (Proveedores Particulares)</h2>
+                    <button class="btn btn-primary" onclick="openModal('modal-provider')">+ Agendar Visita</button>
+                </div>
+                <div class="grid" id="providers-list">
+                    </div>
+            </section>
+
+            <section id="view-admin-view" class="view">
+                <div class="header">
+                    <h2>Panel de Administración (Solo Admin)</h2>
+                </div>
+                <div class="grid">
+                    <div class="card">
+                        <span class="stat-lbl">Ventas Totales del Periodo</span>
+                        <span class="stat-val mono" id="admin-total-sales">$0.00</span>
+                    </div>
+                    <div class="card">
+                        <span class="stat-lbl">Deuda Total por Cobrar</span>
+                        <span class="stat-val mono" style="color: var(--danger)" id="admin-total-debt">$0.00</span>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Auditoría de Screenshots</h3>
+                    <div id="screenshot-gallery" style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">
+                        </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="modal-client" class="modal">
+        <div class="modal-content">
+            <h3>Registrar Nuevo Cliente</h3>
+            <div class="form-group" style="margin-top:20px">
+                <label>Nombre Completo</label>
+                <input type="text" id="new-cust-name" placeholder="Ej: Juan Pérez">
+            </div>
+            <div style="display:flex; gap:10px; justify-content: flex-end">
+                <button class="btn btn-outline" onclick="closeModal('modal-client')">Cancelar</button>
+                <button class="btn btn-primary" onclick="addCustomer()">Guardar Cliente</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-provider" class="modal">
+        <div class="modal-content">
+            <h3>Programar Visita a Librería Particular</h3>
+            <div class="form-group" style="margin-top:20px">
+                <label>Nombre del Vendedor</label>
+                <input type="text" id="prov-name" placeholder="Nombre">
+            </div>
+            <div class="form-group">
+                <label>Fecha Programada</label>
+                <input type="date" id="prov-date">
+            </div>
+            <div class="form-group">
+                <label>Ubicación / Dirección</label>
+                <input type="text" id="prov-loc" placeholder="Dirección de la visita">
+            </div>
+            <div style="display:flex; gap:10px; justify-content: flex-end">
+                <button class="btn btn-outline" onclick="closeModal('modal-provider')">Cancelar</button>
+                <button class="btn btn-primary" onclick="addProvider()">Agendar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ESTADO DE LA APP 
+        let state = {
+            role: 'cajero', // 'admin' o 'cajero'
+            clients: [
+                { id: 1, name: 'Ana García', total: 10000, paid: 3000, courier: 'FedEx', address: 'Av. Reforma 10' },
+                { id: 2, name: 'Luis Torres', total: 5000, paid: 5000, courier: 'DHL', address: 'Calle Juárez 5' }
+            ],
+            visits: [
+                { name: 'Don Roberto (Sótano)', date: '2023-10-25', loc: 'Colonia Roma Norte' }
+            ],
+            salesHistory: []
+        };
+
+        const fmt = (n) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+
+        // NAVEGACIÓN
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if(viewId === 'clients') renderClients();
+            if(viewId === 'admin-view') renderAdmin();
+            if(viewId === 'providers') renderProviders();
+        }
+
+        function toggleRole() {
+            state.role = state.role === 'admin' ? 'cajero' : 'admin';
+            document.getElementById('current-username').textContent = state.role.toUpperCase();
+            document.getElementById('admin-nav').style.display = state.role === 'admin' ? 'block' : 'none';
+        }
+
+        //  LÓGICA DE CLIENTES 
+        function renderClients() {
+            const container = document.getElementById('clients-table');
+            const select = document.getElementById('sale-client-select');
+            
+            container.innerHTML = '';
+            select.innerHTML = '<option value="">-- Seleccionar --</option>';
+
+            state.clients.forEach(c => {
+                const rest = c.total - c.paid;
+                const status = rest <= 0 ? '<span class="badge badge-paid">Pagado</span>' : '<span class="badge badge-debt">Debe</span>';
+                
+                container.innerHTML += `
+                    <tr>
+                        <td><strong>${c.name}</strong></td>
+                        <td class="mono">${fmt(c.total)}</td>
+                        <td class="mono" style="color: var(--success)">${fmt(c.paid)}</td>
+                        <td class="mono" style="color: var(--danger)">${fmt(rest)}</td>
+                        <td>${status}</td>
+                        <td><button class="btn btn-outline" style="padding:4px 8px" onclick="alert('Dir: ${c.address}')">📍</button></td>
+                    </tr>
+                `;
+                select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+            });
+        }
+
+        function addCustomer() {
+            const name = document.getElementById('new-cust-name').value;
+            if(!name) return;
+            state.clients.push({ id: Date.now(), name, total: 0, paid: 0, courier: '', address: '' });
+            closeModal('modal-client');
+            renderClients();
+        }
+
+        // LÓGICA DE VENTAS 
+        document.getElementById('sale-form').onsubmit = function(e) {
+            e.preventDefault();
+            const clientId = document.getElementById('sale-client-select').value;
+            const amount = parseFloat(document.getElementById('sale-amount').value);
+            const payment = parseFloat(document.getElementById('sale-payment').value);
+            
+            const client = state.clients.find(c => c.id == clientId);
+            if(client) {
+                client.total += amount;
+                client.paid += payment;
+                client.courier = document.getElementById('sale-courier').value;
+                client.address = document.getElementById('sale-address').value;
+                
+                // Guardar en historial para el admin
+                state.salesHistory.push({
+                    client: client.name,
+                    amount,
+                    payment,
+                    date: new Date().toLocaleDateString()
+                });
+
+                alert('¡Acumulado actualizado con éxito!');
+                this.reset();
+                switchView('clients');
+            }
+        };
+
+        // LÓGICA DE PROVEEDORES 
+        function renderProviders() {
+            const container = document.getElementById('providers-list');
+            container.innerHTML = '';
+            state.visits.forEach(v => {
+                container.innerHTML += `
+                    <div class="card">
+                        <div style="font-size:12px; color:var(--primary); font-weight:800; margin-bottom:5px">PRÓXIMA VISITA</div>
+                        <h3>${v.name}</h3>
+                        <p style="font-size:14px; color:var(--text-soft); margin: 10px 0;">📅 ${v.date}</p>
+                        <p style="font-size:14px;">📍 ${v.loc}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function addProvider() {
+            const name = document.getElementById('prov-name').value;
+            const date = document.getElementById('prov-date').value;
+            const loc = document.getElementById('prov-loc').value;
+            if(name && date) {
+                state.visits.push({ name, date, loc });
+                closeModal('modal-provider');
+                renderProviders();
+            }
+        }
+
+        //  VISTA ADMIN 
+        function renderAdmin() {
+            const totalS = state.clients.reduce((s, c) => s + c.total, 0);
+            const totalD = state.clients.reduce((s, c) => s + (c.total - c.paid), 0);
+            
+            document.getElementById('admin-total-sales').textContent = fmt(totalS);
+            document.getElementById('admin-total-debt').textContent = fmt(totalD);
+        }
+
+        //  MODALES 
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // Inicialización
+        renderClients();
+    </script>
+</body>
+</html>
