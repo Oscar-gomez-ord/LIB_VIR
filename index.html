@@ -1121,13 +1121,18 @@ let state = {
 if (state.url) {
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
-  api('read', { tab: 'Usuarios' }).then(res => {
-    state.users = res.rows || [];
-    renderUserPicker();
-  }).catch(() => {
-    // show picker anyway, will show empty state
-    renderUserPicker();
-  });
+  api('read', { tab: 'Usuarios' })
+    .then(res => {
+      state.users = Array.isArray(res.rows) ? res.rows : [];
+      renderUserPicker();
+    })
+    .catch(() => {
+      // Error de red o script inválido: volver al setup limpiando la URL
+      localStorage.removeItem('bf_url');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('setup-screen').style.display = 'flex';
+      setTimeout(() => toast('No se pudo conectar — verifica la URL del script', 'error'), 300);
+    });
 } else {
   document.getElementById('setup-screen').style.display = 'flex';
 }
@@ -1148,18 +1153,46 @@ async function api(action, body) {
 async function connectDB() {
   const url = document.getElementById('db-url').value.trim();
   if (!url.startsWith('https://')) return toast('URL inválida, debe comenzar con https://', 'error');
+
+  const btn = document.querySelector('#setup-screen .btn-primary');
+  btn.textContent = 'Conectando...';
+  btn.disabled = true;
+
   try {
     localStorage.setItem('bf_url', url);
     state.url = url;
-    const res = await api('read', { tab: 'Usuarios' });
-    if (res.ok) {
-      if (!res.rows || res.rows.length === 0) {
-        await api('write', { tab: 'Usuarios', rows: [{ id: '1', name: 'Admin', pin: '1234', role: 'admin' }] });
-        toast('¡Base conectada! Usuario Admin creado con PIN 1234', 'success');
-      }
-      location.reload();
+
+    // Intentar leer usuarios — si la hoja es nueva vendrá rows:[]
+    let rows = [];
+    try {
+      const res = await api('read', { tab: 'Usuarios' });
+      rows = Array.isArray(res.rows) ? res.rows : [];
+    } catch (_) {
+      // Si la primera lectura falla (hoja aún sin inicializar) lo ignoramos
+      rows = [];
     }
-  } catch (e) { toast('Error de conexión, verifica la URL', 'error'); }
+
+    // Si no hay ningún usuario, crear Admin por defecto
+    if (rows.length === 0) {
+      await api('write', {
+        tab: 'Usuarios',
+        rows: [{ id: String(Date.now()), name: 'Admin', pin: '1234', role: 'admin' }]
+      });
+      toast('¡Base conectada! Admin creado — PIN: 1234', 'success');
+    } else {
+      toast('¡Base conectada!', 'success');
+    }
+
+    setTimeout(() => location.reload(), 800);
+
+  } catch (e) {
+    // Si algo falla, limpiamos para no dejar URL inválida guardada
+    localStorage.removeItem('bf_url');
+    state.url = null;
+    btn.textContent = '📚 Inicializar BookFlow';
+    btn.disabled = false;
+    toast('Error de conexión — verifica la URL del script', 'error');
+  }
 }
 
 // ─── SYNC ────────────────────────────────────────────────────────
