@@ -1,375 +1,423 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookFlow Premium | Librería Virtual</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Syne:wght@700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #4f46e5; --bg: #f8fafc; --surface: #ffffff;
-            --text: #0f172a; --text-soft: #64748b; --border: #e2e8f0;
-            --success: #10b981; --danger: #f43f5e; --radius: 12px;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookFlow Enterprise — Librería Virtual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        /* Screens */
-        .full-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .card { background: var(--surface); padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
-        
-        /* PIN Pad */
-        .pin-dots { display: flex; justify-content: center; gap: 15px; margin: 25px 0; }
-        .dot { width: 14px; height: 14px; border: 2px solid var(--border); border-radius: 50%; }
-        .dot.active { background: var(--primary); border-color: var(--primary); transform: scale(1.2); }
-        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .btn-num { background: white; border: 1px solid var(--border); padding: 20px; border-radius: 12px; font-size: 1.2rem; cursor: pointer; }
-        .btn-num:hover { border-color: var(--primary); color: var(--primary); }
+<style>
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --surface2: #334155; --border: #334155;
+    --accent: #3b82f6; --accent-dim: rgba(59, 130, 246, 0.15);
+    --green: #10b981; --red: #ef4444; --warning: #f59e0b;
+    --text: #f8fafc; --text-muted: #94a3b8; --radius: 12px;
+  }
 
-        /* Sidebar & Layout */
-        .app-layout { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
-        .sidebar { background: #ffffff; border-right: 1px solid var(--border); padding: 30px; display: flex; flex-direction: column; }
-        .nav-btn { padding: 12px; border-radius: 10px; cursor: pointer; margin-bottom: 8px; font-weight: 600; color: var(--text-soft); transition: 0.2s; border:none; background:transparent; text-align:left;}
-        .nav-btn.active { background: #eef2ff; color: var(--primary); }
-        .main { padding: 40px; overflow-y: auto; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Dashboard */
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); }
-        .stat-card small { color: var(--text-soft); font-size: 12px; }
-        .stat-card p { font-size: 24px; font-weight: 800; margin-top: 5px; }
+  /* AUTH & WIZARD */
+  .auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;}
+  .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 500px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+  
+  /* PIN PAD */
+  #pin-display { display: flex; gap: 15px; margin: 30px 0; justify-content: center; }
+  .pin-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); transition: 0.2s; }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
+  .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+  .num-btn { background: var(--surface2); border: 1px solid var(--border); color: white; padding: 20px; border-radius: 50%; font-size: 24px; font-weight: 600; cursor: pointer; transition: 0.2s; aspect-ratio: 1; }
+  .num-btn:hover { background: var(--accent); }
 
-        /* Forms & Tables */
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius); overflow: hidden; }
-        th { background: #f1f5f9; padding: 15px; text-align: left; font-size: 12px; color: var(--text-soft); }
-        td { padding: 15px; border-top: 1px solid var(--border); font-size: 14px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin: 8px 0 15px; }
-        .btn-p { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; }
+  /* APP LAYOUT */
+  .app { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
+  .sidebar { background: #020617; border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; }
+  .nav-btn { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: var(--text-muted); cursor: pointer; border: none; background: transparent; font-weight: 500; margin-bottom: 5px; width: 100%; text-align: left;}
+  .nav-btn:hover { background: var(--surface2); color: white; }
+  .nav-btn.active { background: var(--accent-dim); color: var(--accent); border-left: 3px solid var(--accent); }
+  
+  .main { display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { height: 70px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
+  .content { flex: 1; overflow-y: auto; padding: 30px; }
 
-        .view { display: none; }
-        .view.active { display: block; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+  /* CARDS & TABLES */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 25px; }
+  .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+  
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 15px; color: var(--text-muted); font-size: 12px; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+  td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+  /* CUSTOM LIBRERIA */
+  .badge { padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+  .badge-debt { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+  .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+  
+  .img-preview { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 1px solid var(--border); }
+  
+  input, select, textarea { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: white; margin-top: 5px; }
+  .btn-p { background: var(--accent); color: white; padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; width: 100%; }
+  
+  .view { display: none; }
+  .view.active { display: block; }
+
+  #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 10000; }
+  .toast { background: var(--surface2); padding: 15px 25px; border-radius: 8px; border-left: 4px solid var(--accent); margin-top: 10px; animation: slideIn 0.3s forwards; }
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+</style>
 </head>
 <body>
 
-    <div id="screen-setup" class="full-screen">
-        <div class="card">
-            <h2 style="font-family:'Syne'">Conectar Base</h2>
-            <p style="color:var(--text-soft); font-size:14px; margin:10px 0 20px">Pega la URL de tu Apps Script</p>
-            <input type="text" id="input-url" placeholder="https://script.google.com/...">
-            <button class="btn-p" id="btn-connect" onclick="connectDB()">Conectar Sistema</button>
-            <div id="setup-loader" style="display:none; margin-top:15px"><div class="loader"></div></div>
+<div id="toast-container"></div>
+
+<div id="setup-screen" class="auth-screen">
+    <div class="auth-card">
+        <h2 style="margin-bottom:10px">Conectar Base de Datos</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px">Ingresa la URL de tu Google Apps Script para iniciar la librería.</p>
+        <input type="text" id="db-url" placeholder="https://script.google.com/...">
+        <button class="btn-p" style="margin-top:20px" onclick="connectDB()">Inicializar BookFlow</button>
+    </div>
+</div>
+
+<div id="login-screen" class="auth-screen" style="display:none">
+    <div class="auth-card" style="max-width:350px">
+        <h2 id="login-user-name">Acceso</h2>
+        <div id="pin-display">
+            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+        <div class="numpad">
+            <button class="num-btn" onclick="pressKey('1')">1</button>
+            <button class="num-btn" onclick="pressKey('2')">2</button>
+            <button class="num-btn" onclick="pressKey('3')">3</button>
+            <button class="num-btn" onclick="pressKey('4')">4</button>
+            <button class="num-btn" onclick="pressKey('5')">5</button>
+            <button class="num-btn" onclick="pressKey('6')">6</button>
+            <button class="num-btn" onclick="pressKey('7')">7</button>
+            <button class="num-btn" onclick="pressKey('8')">8</button>
+            <button class="num-btn" onclick="pressKey('9')">9</button>
+            <button class="num-btn" style="color:var(--red)" onclick="clearPin()">C</button>
+            <button class="num-btn" onclick="pressKey('0')">0</button>
+            <button class="num-btn" style="color:var(--accent)" onclick="resetDB()">🔄</button>
         </div>
     </div>
+</div>
 
-    <div id="screen-login" class="full-screen" style="display:none">
-        <div class="card">
-            <h2 id="login-title">Acceso</h2>
-            <div class="pin-dots" id="pin-dots">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+<div id="app" class="app" style="display:none">
+    <aside class="sidebar">
+        <div style="font-size:24px; font-weight:800; color:var(--accent); margin-bottom:40px">BookFlow</div>
+        <nav style="flex:1">
+            <button class="nav-btn active" onclick="showView('clients', this)">👥 Clientes & Acumulados</button>
+            <button class="nav-btn" onclick="showView('sales', this)">🛍️ Nueva Venta</button>
+            <button class="nav-btn" onclick="showView('visits', this)">🚐 Visitas Proveedores</button>
+            <button id="nav-admin" class="nav-btn" style="display:none" onclick="showView('admin', this)">📊 Panel Admin</button>
+            <button id="nav-users" class="nav-btn" style="display:none" onclick="showView('users', this)">🔑 Usuarios</button>
+        </nav>
+        <div id="current-user-tag" style="font-size:12px; color:var(--text-muted); border-top:1px solid var(--border); padding-top:15px">Usuario: -</div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <h2 id="view-title">Clientes</h2>
+            <div style="display:flex; gap:15px; align-items:center">
+                <button class="nav-btn" style="width:auto" onclick="syncAll()">🔄 Sincronizar</button>
+                <button class="nav-btn" style="color:var(--red); width:auto" onclick="location.reload()">Cerrar Sesión</button>
             </div>
-            <div class="numpad">
-                <button class="btn-num" onclick="pressPin('1')">1</button>
-                <button class="btn-num" onclick="pressPin('2')">2</button>
-                <button class="btn-num" onclick="pressPin('3')">3</button>
-                <button class="btn-num" onclick="pressPin('4')">4</button>
-                <button class="btn-num" onclick="pressPin('5')">5</button>
-                <button class="btn-num" onclick="pressPin('6')">6</button>
-                <button class="btn-num" onclick="pressPin('7')">7</button>
-                <button class="btn-num" onclick="pressPin('8')">8</button>
-                <button class="btn-num" onclick="pressPin('9')">9</button>
-                <button class="btn-num" style="color:var(--danger)" onclick="clearPin()">C</button>
-                <button class="btn-num" onclick="pressPin('0')">0</button>
-            </div>
-        </div>
-    </div>
+        </header>
 
-    <div id="app" class="app-layout" style="display:none">
-        <aside class="sidebar">
-            <h2 style="font-family:'Syne'; color:var(--primary); margin-bottom:30px">BookFlow</h2>
-            <nav style="flex:1">
-                <button class="nav-btn active" onclick="switchView('dash', this)">📊 Dashboard</button>
-                <button class="nav-btn" onclick="switchView('clients', this)">👥 Clientes</button>
-                <button class="nav-btn" onclick="switchView('pos', this)">🛒 Nueva Venta</button>
-                <button id="nav-users" class="nav-btn" style="display:none" onclick="switchView('users', this)">🔑 Usuarios</button>
-            </nav>
-            <div id="user-info" style="font-size:12px; color:var(--text-soft); border-top:1px solid var(--border); padding-top:15px">
-                Usuario: <b id="current-name"></b>
-                <p style="cursor:pointer; color:var(--danger); margin-top:5px" onclick="location.reload()">Salir</p>
-            </div>
-        </aside>
-
-        <main class="main">
-            <section id="view-dash" class="view active">
-                <div class="stats">
-                    <div class="stat-card"><small>INGRESOS TOTALES</small><p id="stat-money">$0</p></div>
-                    <div class="stat-card"><small>LIBROS EN MANOS</small><p id="stat-books">0</p></div>
-                    <div class="stat-card"><small>DEUDA PENDIENTE</small><p id="stat-debt" style="color:var(--danger)">$0</p></div>
-                </div>
-                <div style="background:white; padding:20px; border-radius:12px; border:1px solid var(--border)">
-                    <canvas id="chartSales" height="100"></canvas>
-                </div>
-                
-            </section>
-
-            <section id="view-clients" class="view">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-                    <h2>Lista de Clientes</h2>
+        <section class="content">
+            
+            <div id="view-clients" class="view active">
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px">
+                    <input type="text" id="search-client" placeholder="Buscar cliente..." style="width:300px; margin:0" oninput="renderClients()">
                     <button class="btn-p" style="width:auto" onclick="openClientForm()">+ Nuevo Cliente</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr><th>Nombre</th><th>Dirección</th><th>Libros</th><th>Adeudo</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody id="table-clients"></tbody>
-                </table>
-            </section>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr><th>Nombre / Red Social</th><th>Dirección de Envío</th><th>Libros</th><th>Total</th><th>Abonado</th><th>Resta</th></tr>
+                        </thead>
+                        <tbody id="table-clients"></tbody>
+                    </table>
+                </div>
+            </div>
 
-            <section id="view-pos" class="view">
-                <h2>Registrar Compra</h2>
-                <div style="background:white; padding:30px; border-radius:12px; margin-top:20px; max-width:500px; border:1px solid var(--border)">
-                    <form id="form-sale">
+            <div id="view-sales" class="view">
+                <div class="card" style="max-width:600px; margin: 0 auto">
+                    <h3>Registrar Venta / Abono</h3>
+                    <form id="form-sale" style="margin-top:20px">
                         <label>Cliente</label>
                         <select id="sale-client" required></select>
-                        <label>Total Compra ($)</label>
-                        <input type="number" id="sale-amount" required>
-                        <label>Abono hoy ($)</label>
-                        <input type="number" id="sale-paid" value="0">
-                        <label>Cant. Libros</label>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
+                            <div><label>Monto Compra ($)</label><input type="number" id="sale-amount" value="0"></div>
+                            <div><label>Abono Realizado ($)</label><input type="number" id="sale-paid" value="0"></div>
+                        </div>
+                        
+                        <label>Cantidad de Libros</label>
                         <input type="number" id="sale-qty" value="1">
-                        <label>Screenshot / Link Pago</label>
-                        <input type="text" id="sale-img" placeholder="URL o Nota">
-                        <button type="submit" class="btn-p">Guardar Venta</button>
+
+                        <label>Captura de Pantalla (URL/Link)</label>
+                        <input type="text" id="sale-ss" placeholder="Pega el link de la imagen o nota">
+
+                        <label>Paquetería de su agrado</label>
+                        <input type="text" id="sale-courier" placeholder="Ej: DHL, Correos, FedEx">
+
+                        <button type="submit" class="btn-p" style="margin-top:20px">Guardar en el Acumulado</button>
                     </form>
                 </div>
-            </section>
+            </div>
 
-            <section id="view-users" class="view">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
-                    <h2>Gestión de Personal</h2>
-                    <button class="btn-p" style="width:auto" onclick="openUserForm()">+ Nuevo Usuario</button>
+            <div id="view-admin" class="view">
+                <div class="grid-stats">
+                    <div class="stat-card"><h3>Ingresos Totales</h3><p id="adm-total-money">$0.00</p></div>
+                    <div class="stat-card"><h3>Libros en Acumulados</h3><p id="adm-total-books">0</p></div>
+                    <div class="stat-card"><h3>Por Cobrar</h3><p id="adm-total-debt" style="color:var(--red)">$0.00</p></div>
                 </div>
-                <table id="table-users">
-                    <thead><tr><th>Nombre</th><th>Rol</th><th>PIN</th><th>Acciones</th></tr></thead>
-                    <tbody id="body-users"></tbody>
-                </table>
-            </section>
-        </main>
-    </div>
+                <div class="card">
+                    <canvas id="chart-sales" height="100"></canvas>
+                </div>
+                
+            </div>
 
-    <script>
-        let state = {
-            url: localStorage.getItem('bf_url'),
-            user: null,
-            pin: "",
-            data: { clients: [], sales: [], users: [] }
-        };
+            <div id="view-users" class="view">
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px">
+                    <h2>Gestión de Personal</h2>
+                    <button class="btn-p" style="width:auto" onclick="openUserForm()">+ Crear Usuario</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead><tr><th>Nombre</th><th>PIN</th><th>Rol</th><th>Acciones</th></tr></thead>
+                        <tbody id="table-users"></tbody>
+                    </table>
+                </div>
+            </div>
 
-        async function connectDB() {
-            const url = document.getElementById('input-url').value;
-            if(!url.includes('script.google.com')) return alert('URL no válida');
-            
-            document.getElementById('btn-connect').disabled = true;
-            document.getElementById('setup-loader').style.display = 'block';
+            <div id="view-visits" class="view">
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px">
+                    <h2>Próximas Visitas a Proveedores</h2>
+                    <button class="btn-p" style="width:auto" onclick="openVisitForm()">+ Agendar Visita</button>
+                </div>
+                <div class="grid-stats" id="visits-container"></div>
+            </div>
 
-            try {
-                localStorage.setItem('bf_url', url);
-                state.url = url;
-                const check = await api('read', { tab: 'Usuarios' });
-                if(check.ok) {
-                    if(check.rows.length === 0) {
-                        // Crear primer admin
-                        await api('write', { tab: 'Usuarios', rows: [{ id: '1', name: 'Admin Principal', pin: '1234', role: 'admin' }] });
-                    }
-                    location.reload();
-                } else {
-                    throw new Error();
-                }
-            } catch(e) {
-                alert('Error de conexión. Verifica que el Script esté publicado como App Web para "Cualquiera".');
-                localStorage.removeItem('bf_url');
-                location.reload();
+        </section>
+    </main>
+</div>
+
+<script>
+let state = {
+    url: localStorage.getItem('bf_url'),
+    user: null,
+    pin: "",
+    clients: [],
+    sales: [],
+    users: [],
+    visits: []
+};
+
+// 1. CONEXIÓN
+async function connectDB() {
+    const url = document.getElementById('db-url').value;
+    if(!url.startsWith('https://')) return toast("URL inválida", "red");
+    
+    try {
+        localStorage.setItem('bf_url', url);
+        state.url = url;
+        const res = await api('read', { tab: 'Usuarios' });
+        if(res.ok) {
+            if(res.rows.length === 0) {
+                await api('write', { tab: 'Usuarios', rows: [{id: '1', name: 'Admin', pin: '1234', role: 'admin'}] });
             }
-        }
-
-        async function api(action, body) {
-            const res = await fetch(state.url, {
-                method: 'POST',
-                mode: 'no-cors', // Importante para evitar ciertos bugs de redirect en Apps Script
-                body: JSON.stringify({ action, ...body })
-            });
-            // Debido a mode 'no-cors', no podemos leer la respuesta directamente, 
-            // pero Apps Script suele procesar el POST. 
-            // Para lectura, usaremos un truco de fetch normal:
-            const realRes = await fetch(state.url + "?action=" + action + "&tab=" + (body.tab || ""));
-            return await realRes.json();
-        }
-
-        async function sync() {
-            const [u, c, s] = await Promise.all([
-                api('read', { tab: 'Usuarios' }),
-                api('read', { tab: 'Clientes' }),
-                api('read', { tab: 'Ventas' })
-            ]);
-            state.data.users = u.rows || [];
-            state.data.clients = c.rows || [];
-            state.data.sales = s.rows || [];
-            renderAll();
-        }
-
-        function pressPin(n) {
-            if(state.pin.length < 4) {
-                state.pin += n;
-                const dots = document.querySelectorAll('.dot');
-                dots.forEach((d, i) => d.classList.toggle('active', i < state.pin.length));
-                if(state.pin.length === 4) login();
-            }
-        }
-
-        function login() {
-            const found = state.data.users.find(u => u.pin === state.pin);
-            if(found) {
-                state.user = found;
-                document.getElementById('screen-login').style.display = 'none';
-                document.getElementById('app').style.display = 'grid';
-                document.getElementById('current-name').innerText = found.name;
-                if(found.role === 'admin') document.getElementById('nav-users').style.display = 'block';
-                switchView('dash', document.querySelector('.nav-btn'));
-            } else {
-                alert('PIN Incorrecto');
-                clearPin();
-            }
-        }
-
-        function clearPin() {
-            state.pin = "";
-            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-        }
-
-        function switchView(id, btn) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            btn.classList.add('active');
-            if(id === 'dash') renderCharts();
-        }
-
-        function renderAll() {
-            // Clientes
-            const tClients = document.getElementById('table-clients');
-            tClients.innerHTML = state.data.clients.map(c => {
-                const resta = parseFloat(c.totalDebt) - parseFloat(c.totalPaid);
-                return `<tr>
-                    <td><b>${c.name}</b></td>
-                    <td>${c.address}</td>
-                    <td>${c.bookCount}</td>
-                    <td>$${resta.toFixed(2)}</td>
-                    <td><button onclick="deleteItem('Clientes','id','${c.id}')">🗑</button></td>
-                </tr>`;
-            }).join('');
-
-            // Usuarios
-            document.getElementById('body-users').innerHTML = state.data.users.map(u => `
-                <tr><td>${u.name}</td><td>${u.role}</td><td>${u.pin}</td><td><button onclick="deleteItem('Usuarios','id','${u.id}')">🗑</button></td></tr>
-            `).join('');
-
-            // Stats
-            const totalCash = state.data.sales.reduce((acc, v) => acc + parseFloat(v.amount), 0);
-            const totalBooks = state.data.clients.reduce((acc, c) => acc + parseInt(c.bookCount), 0);
-            const totalDebt = state.data.clients.reduce((acc, c) => acc + (parseFloat(c.totalDebt) - parseFloat(c.totalPaid)), 0);
-            document.getElementById('stat-money').innerText = "$" + totalCash.toLocaleString();
-            document.getElementById('stat-books').innerText = totalBooks;
-            document.getElementById('stat-debt').innerText = "$" + totalDebt.toLocaleString();
-
-            // Select
-            document.getElementById('sale-client').innerHTML = state.data.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        }
-
-        async function deleteItem(tab, field, val) {
-            if(!confirm('¿Eliminar?')) return;
-            // Usamos POST simple para eliminar
-            await fetch(state.url, { method: 'POST', body: JSON.stringify({ action: 'deleteRow', tab, idField: field, idValue: val }) });
             location.reload();
         }
+    } catch(e) { toast("Error de conexión", "red"); }
+}
 
-        function renderCharts() {
-            const ctx = document.getElementById('chartSales').getContext('2d');
-            if(window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: state.data.sales.slice(-7).map(s => s.date.split('T')[0]),
-                    datasets: [{
-                        label: 'Ventas ($)',
-                        data: state.data.sales.slice(-7).map(s => s.amount),
-                        borderColor: '#4f46e5',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(79, 70, 229, 0.05)'
-                    }]
-                }
-            });
+async function api(action, body) {
+    const res = await fetch(state.url + (action === 'read' ? `?action=read&tab=${body.tab}` : ''), {
+        method: action === 'read' ? 'GET' : 'POST',
+        body: action === 'read' ? null : JSON.stringify({ action, ...body })
+    });
+    return await res.json();
+}
+
+async function syncAll() {
+    toast("Sincronizando...");
+    const [c, s, u, v] = await Promise.all([
+        api('read', { tab: 'Clientes' }), api('read', { tab: 'Ventas' }),
+        api('read', { tab: 'Usuarios' }), api('read', { tab: 'Visitas' })
+    ]);
+    state.clients = c.rows || [];
+    state.sales = s.rows || [];
+    state.users = u.rows || [];
+    state.visits = v.rows || [];
+    renderClients();
+    renderVisits();
+    renderUsers();
+    renderDashboard();
+    populateSelects();
+}
+
+// 2. PIN LOGIN
+function pressKey(n) {
+    if(state.pin.length < 4) {
+        state.pin += n;
+        document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('filled', i < state.pin.length));
+        if(state.pin.length === 4) attemptLogin();
+    }
+}
+function clearPin() { state.pin = ""; document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled')); }
+function attemptLogin() {
+    const found = state.users.find(u => u.pin === state.pin);
+    if(found) {
+        state.user = found;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'grid';
+        document.getElementById('current-user-tag').textContent = `Usuario: ${found.name} (${found.role})`;
+        if(found.role === 'admin') {
+            document.getElementById('nav-admin').style.display = 'flex';
+            document.getElementById('nav-users').style.display = 'flex';
         }
+        syncAll();
+    } else { toast("PIN Incorrecto", "red"); clearPin(); }
+}
 
-        // Forms
-        async function openClientForm() {
-            const name = prompt("Nombre del cliente:");
-            const addr = prompt("Dirección:");
-            if(name && addr) {
-                await fetch(state.url, { method: 'POST', body: JSON.stringify({ 
-                    action: 'write', tab: 'Clientes', rows: [{ id: Date.now().toString(), name, address: addr, totalDebt: 0, totalPaid: 0, bookCount: 0 }] 
-                }) });
-                location.reload();
-            }
-        }
+// 3. RENDERERS
+function showView(id, btn) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('view-' + id).classList.add('active');
+    document.getElementById('view-title').textContent = id.charAt(0).toUpperCase() + id.slice(1);
+    btn.classList.add('active');
+}
 
-        async function openUserForm() {
-            const name = prompt("Nombre:");
-            const pin = prompt("PIN (4 dígitos):");
-            const role = prompt("Rol (admin o user):");
-            if(name && pin) {
-                await fetch(state.url, { method: 'POST', body: JSON.stringify({ 
-                    action: 'write', tab: 'Usuarios', rows: [{ id: Date.now().toString(), name, pin, role }] 
-                }) });
-                location.reload();
-            }
-        }
+function renderClients() {
+    const search = document.getElementById('search-client').value.toLowerCase();
+    const tbody = document.getElementById('table-clients');
+    const filtered = state.clients.filter(c => c.name.toLowerCase().includes(search));
+    
+    tbody.innerHTML = filtered.map(c => {
+        const resta = parseFloat(c.totalDebt) - parseFloat(c.totalPaid);
+        return `<tr>
+            <td><b>${c.name}</b></td>
+            <td style="font-size:12px; color:var(--text-muted)">${c.address}</td>
+            <td class="mono">${c.bookCount}</td>
+            <td class="mono">$${parseFloat(c.totalDebt).toFixed(2)}</td>
+            <td class="mono" style="color:var(--green)">$${parseFloat(c.totalPaid).toFixed(2)}</td>
+            <td><span class="badge ${resta > 0 ? 'badge-debt' : 'badge-success'}">$${resta.toFixed(2)}</span></td>
+        </tr>`;
+    }).join('');
+}
 
-        document.getElementById('form-sale').onsubmit = async (e) => {
-            e.preventDefault();
-            const cid = document.getElementById('sale-client').value;
-            const amount = parseFloat(document.getElementById('sale-amount').value);
-            const paid = parseFloat(document.getElementById('sale-paid').value);
-            const qty = parseInt(document.getElementById('sale-qty').value);
+function renderVisits() {
+    const container = document.getElementById('visits-container');
+    container.innerHTML = state.visits.map(v => `
+        <div class="stat-card">
+            <small>${v.date}</small>
+            <p style="font-size:18px">${v.providerName}</p>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:5px">📍 ${v.location}</div>
+        </div>
+    `).join('');
+}
 
-            const client = state.data.clients.find(c => c.id == cid);
-            
-            await fetch(state.url, { method: 'POST', body: JSON.stringify({ 
-                action: 'write', tab: 'Ventas', rows: [{ id: Date.now().toString(), date: new Date().toISOString(), customerId: cid, amount, payment: paid, booksQty: qty }] 
-            }) });
+function renderUsers() {
+    document.getElementById('table-users').innerHTML = state.users.map(u => `
+        <tr><td>${u.name}</td><td class="mono">${u.pin}</td><td>${u.role}</td><td><button onclick="deleteRow('Usuarios','${u.id}')">🗑</button></td></tr>
+    `).join('');
+}
 
-            await fetch(state.url, { method: 'POST', body: JSON.stringify({ 
-                action: 'updateRow', tab: 'Clientes', idField: 'id', idValue: cid, updates: { 
-                    totalDebt: parseFloat(client.totalDebt) + amount, 
-                    totalPaid: parseFloat(client.totalPaid) + paid,
-                    bookCount: parseInt(client.bookCount) + qty
-                } 
-            }) });
+function renderDashboard() {
+    const totalRev = state.sales.reduce((a, b) => a + parseFloat(b.amount), 0);
+    const totalBooks = state.clients.reduce((a, b) => a + parseInt(b.bookCount), 0);
+    const totalDebt = state.clients.reduce((a, b) => a + (parseFloat(b.totalDebt) - parseFloat(b.totalPaid)), 0);
+    
+    document.getElementById('adm-total-money').textContent = `$${totalRev.toFixed(2)}`;
+    document.getElementById('adm-total-books').textContent = totalBooks;
+    document.getElementById('adm-total-debt').textContent = `$${totalDebt.toFixed(2)}`;
+}
 
-            location.reload();
-        }
+function populateSelects() {
+    document.getElementById('sale-client').innerHTML = state.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+}
 
-        // Inicio
-        if(state.url) {
-            document.getElementById('screen-setup').style.display = 'none';
-            document.getElementById('screen-login').style.display = 'flex';
-            sync();
-        }
-    </script>
-</body>
-</html>
+// 4. FORMS & ACTIONS
+async function openClientForm() {
+    const name = prompt("Nombre / Red Social:");
+    const addr = prompt("Dirección de envío:");
+    if(name && addr) {
+        await api('write', { tab: 'Clientes', rows: [{id: Date.now(), name, address: addr, totalDebt: 0, totalPaid: 0, bookCount: 0}] });
+        syncAll();
+    }
+}
+
+async function openUserForm() {
+    const name = prompt("Nombre:");
+    const pin = prompt("PIN (4 dígitos):");
+    const role = prompt("Rol (admin/cajero):");
+    if(name && pin) {
+        await api('write', { tab: 'Usuarios', rows: [{id: Date.now(), name, pin, role}] });
+        syncAll();
+    }
+}
+
+async function openVisitForm() {
+    const name = prompt("Nombre del Proveedor:");
+    const date = prompt("Fecha (AAAA-MM-DD):");
+    const loc = prompt("Ubicación:");
+    if(name && date) {
+        await api('write', { tab: 'Visitas', rows: [{id: Date.now(), providerName: name, date, location: loc}] });
+        syncAll();
+    }
+}
+
+document.getElementById('form-sale').onsubmit = async (e) => {
+    e.preventDefault();
+    const cid = document.getElementById('sale-client').value;
+    const amount = parseFloat(document.getElementById('sale-amount').value);
+    const paid = parseFloat(document.getElementById('sale-paid').value);
+    const qty = parseInt(document.getElementById('sale-qty').value);
+    const ss = document.getElementById('sale-ss').value;
+    const cour = document.getElementById('sale-courier').value;
+
+    const client = state.clients.find(c => c.id == cid);
+
+    await api('write', { tab: 'Ventas', rows: [{
+        id: Date.now(), date: new Date().toISOString(), customerId: cid, customerName: client.name,
+        amount, payment: paid, booksQty: qty, sellerName: state.user.name, screenshot: ss, courier: cour
+    }] });
+
+    await api('updateRow', { tab: 'Clientes', idField: 'id', idValue: cid, updates: {
+        totalDebt: parseFloat(client.totalDebt) + amount,
+        totalPaid: parseFloat(client.totalPaid) + paid,
+        bookCount: parseInt(client.bookCount) + qty,
+        preferredCourier: cour
+    } });
+
+    toast("¡Venta y Acumulado guardado!", "green");
+    document.getElementById('form-sale').reset();
+    syncAll();
+};
+
+function toast(m, c = "var(--accent)") {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.style.borderLeftColor = c;
+    t.textContent = m;
+    document.getElementById('toast-container').appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+function resetDB() { if(confirm("¿Cambiar de base de datos?")) { localStorage.removeItem('bf_url'); location.reload(); } }
+
+// INIT
+if(state.url) {
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    api('read', { tab: 'Usuarios' }).then(res => { state.users = res.rows || []; });
+}
+</script>
 </body>
 </html>
