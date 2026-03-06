@@ -2,422 +2,1608 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BookFlow Enterprise — Librería Virtual</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BookFlow — Librería Virtual</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-  :root {
-    --bg: #0f172a; --surface: #1e293b; --surface2: #334155; --border: #334155;
-    --accent: #3b82f6; --accent-dim: rgba(59, 130, 246, 0.15);
-    --green: #10b981; --red: #ef4444; --warning: #f59e0b;
-    --text: #f8fafc; --text-muted: #94a3b8; --radius: 12px;
+:root {
+  --bg: #faf7f2;
+  --bg2: #f3ede3;
+  --surface: #ffffff;
+  --surface2: #f0ebe1;
+  --border: #e2d9cc;
+  --border2: #d4c9b8;
+  --accent: #c8692a;
+  --accent-light: rgba(200,105,42,0.10);
+  --accent-mid: rgba(200,105,42,0.20);
+  --navy: #1e2d40;
+  --navy-light: #2e4257;
+  --green: #2d7a5f;
+  --green-light: rgba(45,122,95,0.12);
+  --red: #c0392b;
+  --red-light: rgba(192,57,43,0.12);
+  --amber: #c8862a;
+  --amber-light: rgba(200,134,42,0.12);
+  --text: #1e2d40;
+  --text-muted: #7a6f62;
+  --text-light: #a99f95;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 16px rgba(30,45,64,0.08);
+  --shadow-lg: 0 8px 40px rgba(30,45,64,0.14);
+  --shadow-card: 0 1px 4px rgba(30,45,64,0.06), 0 4px 20px rgba(30,45,64,0.07);
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: 'DM Mono', monospace; }
+.serif { font-family: 'Playfair Display', serif; }
+
+/* ─── SCROLLBAR ─────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+/* ─── AUTH SCREENS ───────────────────────── */
+.auth-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.auth-bg-pattern {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(200,105,42,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(30,45,64,0.05) 0%, transparent 50%);
+}
+
+.auth-card {
+  position: relative; z-index: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 44px;
+  width: 100%; max-width: 460px;
+  box-shadow: var(--shadow-lg);
+  animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.logo-lockup { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+.logo-icon {
+  width: 44px; height: 44px;
+  background: var(--navy);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.logo-text { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--navy); }
+.logo-text span { color: var(--accent); }
+
+/* ─── PIN PAD ────────────────────────────── */
+.pin-display { display: flex; gap: 16px; margin: 28px 0; justify-content: center; }
+.pin-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border2);
+  transition: var(--transition);
+}
+.pin-dot.filled {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(200,105,42,0.4);
+  transform: scale(1.15);
+}
+
+.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.num-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 18px;
+  border-radius: 50%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 20px; font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.num-btn:hover { background: var(--navy); color: white; transform: scale(1.05); border-color: var(--navy); }
+.num-btn:active { transform: scale(0.95); }
+.num-btn.clear { color: var(--red); }
+.num-btn.reset { font-size: 16px; }
+
+/* ─── APP LAYOUT ─────────────────────────── */
+.app {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── SIDEBAR ────────────────────────────── */
+.sidebar {
+  background: var(--navy);
+  padding: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.sidebar::before {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+  background: linear-gradient(160deg, rgba(200,105,42,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.sidebar-header {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-logo { display: flex; align-items: center; gap: 10px; }
+.sidebar-logo-icon {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.sidebar-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+  color: #fff;
+}
+.sidebar-logo-text span { color: var(--accent); }
+
+.sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+
+.nav-section { margin-bottom: 8px; }
+.nav-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  padding: 8px 12px 4px;
+}
+
+.nav-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer; border: none;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500;
+  margin-bottom: 2px;
+  width: 100%; text-align: left;
+  transition: var(--transition);
+}
+.nav-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+.nav-btn.active {
+  background: rgba(200,105,42,0.18);
+  color: #fff;
+  border-left: 3px solid var(--accent);
+  padding-left: 11px;
+}
+.nav-btn .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.user-pill {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: white;
+}
+.user-info p { font-size: 13px; font-weight: 600; color: #fff; }
+.user-info small { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+/* ─── MAIN ───────────────────────────────── */
+.main { display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar {
+  height: 68px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  box-shadow: 0 1px 0 var(--border);
+  flex-shrink: 0;
+}
+.topbar-left h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--navy);
+}
+.topbar-left p { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #b35a22; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(200,105,42,0.35); }
+.btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--bg2); color: var(--text); }
+.btn-danger { background: var(--red-light); color: var(--red); border: 1px solid rgba(192,57,43,0.2); }
+.btn-danger:hover { background: var(--red); color: white; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-icon { padding: 9px; width: 38px; justify-content: center; }
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 30px;
+  background: var(--bg);
+}
+
+/* ─── VIEWS ──────────────────────────────── */
+.view { display: none; animation: fadeIn 0.25s ease; }
+.view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── CARDS ──────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+.card-body { padding: 24px; }
+.card-header {
+  padding: 20px 24px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; }
+
+/* ─── STAT CARDS ─────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+  position: relative; overflow: hidden;
+  transition: var(--transition);
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.stat-card::after {
+  content: '';
+  position: absolute; right: -10px; top: -10px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  opacity: 0.06;
+}
+.stat-card.orange::after { background: var(--accent); }
+.stat-card.green::after  { background: var(--green); }
+.stat-card.red::after    { background: var(--red); }
+.stat-card.navy::after   { background: var(--navy); }
+
+.stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 10px; }
+.stat-value { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: var(--navy); }
+.stat-value.red   { color: var(--red); }
+.stat-value.green { color: var(--green); }
+.stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.stat-icon { font-size: 22px; margin-bottom: 12px; }
+
+/* ─── TABLE ──────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
+thead tr { border-bottom: 2px solid var(--border); }
+th {
+  text-align: left; padding: 12px 16px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+td { padding: 14px 16px; border-bottom: 1px solid var(--bg2); font-size: 14px; vertical-align: middle; }
+tbody tr { transition: var(--transition); }
+tbody tr:hover { background: var(--bg2); }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ─── BADGES ─────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 99px;
+  font-size: 11px; font-weight: 700;
+  white-space: nowrap;
+}
+.badge-debt   { background: var(--red-light);   color: var(--red);   border: 1px solid rgba(192,57,43,0.15); }
+.badge-ok     { background: var(--green-light);  color: var(--green); border: 1px solid rgba(45,122,95,0.15); }
+.badge-admin  { background: var(--accent-light); color: var(--accent);border: 1px solid rgba(200,105,42,0.15); }
+.badge-staff  { background: var(--amber-light);  color: var(--amber); border: 1px solid rgba(200,134,42,0.15); }
+
+/* ─── INPUTS ─────────────────────────────── */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.7px;
+  color: var(--text-muted); margin-bottom: 7px;
+}
+.form-control {
+  width: 100%; padding: 11px 14px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  transition: var(--transition);
+  outline: none;
+  appearance: none;
+}
+.form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,105,42,0.12); background: var(--surface); }
+.form-control::placeholder { color: var(--text-light); }
+select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6f62' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
+
+.form-row { display: grid; gap: 16px; }
+.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* ─── IMAGE UPLOAD ───────────────────────── */
+.img-upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg);
+  position: relative;
+}
+.img-upload-zone:hover, .img-upload-zone.drag { border-color: var(--accent); background: var(--accent-light); }
+.img-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.img-upload-icon { font-size: 28px; margin-bottom: 8px; }
+.img-upload-text { font-size: 13px; color: var(--text-muted); }
+.img-upload-text strong { color: var(--accent); }
+.img-upload-subtext { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+
+.img-preview-wrap {
+  position: relative; display: inline-block;
+  margin-top: 12px;
+}
+.img-preview-wrap img {
+  width: 100%; max-height: 180px; object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.img-remove-btn {
+  position: absolute; top: -8px; right: -8px;
+  background: var(--red); color: white;
+  border: none; border-radius: 50%;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 13px;
+}
+
+.img-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; transition: var(--transition); }
+.img-thumb:hover { transform: scale(1.1); box-shadow: var(--shadow); }
+
+/* ─── MODAL ──────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(30,45,64,0.45);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: var(--transition);
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface);
+  border-radius: 18px;
+  width: 100%; max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.95) translateY(10px);
+  transition: var(--transition);
+}
+.modal-backdrop.open .modal { transform: scale(1) translateY(0); }
+.modal-header {
+  padding: 24px 28px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; }
+.modal-close {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--bg2); border: 1px solid var(--border);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text-muted);
+  transition: var(--transition);
+}
+.modal-close:hover { background: var(--red-light); color: var(--red); }
+.modal-body { padding: 0 28px; }
+.modal-footer { padding: 20px 28px 28px; display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+
+/* ─── SEARCH BAR ─────────────────────────── */
+.search-bar {
+  position: relative;
+}
+.search-bar input { padding-left: 38px; }
+.search-icon {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px; color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* ─── TOOLBAR ────────────────────────────── */
+.view-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.view-toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* ─── TOAST ──────────────────────────────── */
+#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+  background: var(--navy);
+  color: white;
+  padding: 14px 20px;
+  border-radius: 10px;
+  border-left: 4px solid var(--accent);
+  box-shadow: var(--shadow-lg);
+  font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  min-width: 240px;
+}
+.toast.success { border-left-color: var(--green); }
+.toast.error   { border-left-color: var(--red); }
+@keyframes toastIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(110%); opacity: 0; } }
+
+/* ─── VISITS ─────────────────────────────── */
+.visits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.visit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  transition: var(--transition);
+  position: relative; overflow: hidden;
+}
+.visit-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--amber));
+}
+.visit-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.visit-date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); font-weight: 500; margin-bottom: 10px; }
+.visit-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.visit-loc { font-size: 12px; color: var(--text-muted); display: flex; gap: 5px; align-items: flex-start; }
+.visit-delete {
+  position: absolute; top: 12px; right: 12px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 6px; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 13px; color: var(--text-muted);
+  transition: var(--transition); opacity: 0;
+}
+.visit-card:hover .visit-delete { opacity: 1; }
+.visit-delete:hover { background: var(--red-light); color: var(--red); border-color: rgba(192,57,43,0.2); }
+
+/* ─── EMPTY STATE ────────────────────────── */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
+.empty-state p { font-size: 15px; margin-bottom: 6px; color: var(--text); font-weight: 500; }
+.empty-state small { font-size: 13px; color: var(--text-muted); }
+
+/* ─── SETUP SCREEN ───────────────────────── */
+.setup-step { margin-bottom: 28px; }
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: white;
+  font-size: 13px; font-weight: 700; margin-bottom: 12px;
+}
+
+/* ─── IMAGE LIGHTBOX ─────────────────────── */
+.lightbox {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 9998;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: var(--transition);
+}
+.lightbox.open { opacity: 1; pointer-events: all; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.lightbox-close {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(255,255,255,0.15); color: white;
+  border: none; border-radius: 50%;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; cursor: pointer;
+}
+
+/* ─── MOBILE NAV ─────────────────────────── */
+.mobile-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--navy);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 4px 16px;
+  z-index: 500;
+}
+.mobile-nav-inner { display: flex; justify-content: space-around; }
+.mobile-nav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 12px; border-radius: 10px;
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.45);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; font-weight: 600;
+  transition: var(--transition); min-width: 60px;
+}
+.mobile-nav-btn .icon { font-size: 20px; }
+.mobile-nav-btn.active { color: var(--accent); }
+
+/* ─── CHART WRAPPER ──────────────────────── */
+.chart-wrap { padding: 20px; height: 280px; }
+
+/* ─── CLIENT DETAIL ──────────────────────── */
+.client-name-cell { display: flex; flex-direction: column; gap: 2px; }
+.client-name-cell strong { font-weight: 600; }
+.client-name-cell small { font-size: 11px; color: var(--text-muted); }
+
+/* ─── DIVIDER ────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ─────────────── RESPONSIVE ─────────────── */
+@media (max-width: 768px) {
+  body { overflow: auto; }
+
+  .app {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100vh;
+    padding-bottom: 72px;
   }
+  .sidebar { display: none; }
+  .main { height: auto; overflow: visible; }
+  .content { overflow: visible; padding: 16px; }
+  .topbar { padding: 0 16px; }
+  .topbar-left h2 { font-size: 18px; }
+  .topbar-actions .btn:not(.btn-icon) { display: none; }
+  .mobile-nav { display: block; }
+  .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .stat-value { font-size: 22px; }
+  #toast-container { bottom: 80px; right: 12px; left: 12px; }
+  .toast { min-width: auto; }
+  .modal { border-radius: 18px 18px 0 0; position: fixed; bottom: 0; left: 0; right: 0; max-width: 100%; max-height: 92vh; }
+  .modal-backdrop { align-items: flex-end; padding: 0; }
+  .auth-card { padding: 28px 20px; }
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-
-  /* AUTH & WIZARD */
-  .auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;}
-  .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 500px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-  
-  /* PIN PAD */
-  #pin-display { display: flex; gap: 15px; margin: 30px 0; justify-content: center; }
-  .pin-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); transition: 0.2s; }
-  .pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
-  .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-  .num-btn { background: var(--surface2); border: 1px solid var(--border); color: white; padding: 20px; border-radius: 50%; font-size: 24px; font-weight: 600; cursor: pointer; transition: 0.2s; aspect-ratio: 1; }
-  .num-btn:hover { background: var(--accent); }
-
-  /* APP LAYOUT */
-  .app { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
-  .sidebar { background: #020617; border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; }
-  .nav-btn { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: var(--text-muted); cursor: pointer; border: none; background: transparent; font-weight: 500; margin-bottom: 5px; width: 100%; text-align: left;}
-  .nav-btn:hover { background: var(--surface2); color: white; }
-  .nav-btn.active { background: var(--accent-dim); color: var(--accent); border-left: 3px solid var(--accent); }
-  
-  .main { display: flex; flex-direction: column; overflow: hidden; }
-  .topbar { height: 70px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
-  .content { flex: 1; overflow-y: auto; padding: 30px; }
-
-  /* CARDS & TABLES */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 25px; }
-  .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-  
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; padding: 15px; color: var(--text-muted); font-size: 12px; text-transform: uppercase; border-bottom: 2px solid var(--border); }
-  td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
-
-  /* CUSTOM LIBRERIA */
-  .badge { padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
-  .badge-debt { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-  .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-  
-  .img-preview { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; cursor: pointer; border: 1px solid var(--border); }
-  
-  input, select, textarea { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: white; margin-top: 5px; }
-  .btn-p { background: var(--accent); color: white; padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; width: 100%; }
-  
-  .view { display: none; }
-  .view.active { display: block; }
-
-  #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 10000; }
-  .toast { background: var(--surface2); padding: 15px 25px; border-radius: 8px; border-left: 4px solid var(--accent); margin-top: 10px; animation: slideIn 0.3s forwards; }
-  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@media (max-width: 400px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .numpad { gap: 8px; }
+  .num-btn { padding: 14px; font-size: 18px; }
+}
 </style>
 </head>
 <body>
 
 <div id="toast-container"></div>
 
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- SETUP SCREEN -->
 <div id="setup-screen" class="auth-screen">
-    <div class="auth-card">
-        <h2 style="margin-bottom:10px">Conectar Base de Datos</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px">Ingresa la URL de tu Google Apps Script para iniciar la librería.</p>
-        <input type="text" id="db-url" placeholder="https://script.google.com/...">
-        <button class="btn-p" style="margin-top:20px" onclick="connectDB()">Inicializar BookFlow</button>
+  <div class="auth-bg-pattern"></div>
+  <div class="auth-card">
+    <div class="logo-lockup">
+      <div class="logo-icon">📚</div>
+      <div class="logo-text">Book<span>Flow</span></div>
     </div>
+    <div class="setup-step">
+      <div class="step-num">1</div>
+      <p style="font-size:15px; font-weight:600; margin-bottom:6px">Conectar Base de Datos</p>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px">Ingresa la URL de tu Google Apps Script para inicializar la librería.</p>
+      <div class="form-group">
+        <label class="form-label">URL del Script</label>
+        <input type="url" id="db-url" class="form-control" placeholder="https://script.google.com/macros/s/...">
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%; padding:14px; font-size:15px" onclick="connectDB()">
+      📚 Inicializar BookFlow
+    </button>
+    <p style="text-align:center; margin-top:16px; font-size:12px; color:var(--text-light)">Tus datos se guardan de forma segura en Google Sheets</p>
+  </div>
 </div>
 
+<!-- LOGIN SCREEN -->
 <div id="login-screen" class="auth-screen" style="display:none">
-    <div class="auth-card" style="max-width:350px">
-        <h2 id="login-user-name">Acceso</h2>
-        <div id="pin-display">
-            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-        </div>
-        <div class="numpad">
-            <button class="num-btn" onclick="pressKey('1')">1</button>
-            <button class="num-btn" onclick="pressKey('2')">2</button>
-            <button class="num-btn" onclick="pressKey('3')">3</button>
-            <button class="num-btn" onclick="pressKey('4')">4</button>
-            <button class="num-btn" onclick="pressKey('5')">5</button>
-            <button class="num-btn" onclick="pressKey('6')">6</button>
-            <button class="num-btn" onclick="pressKey('7')">7</button>
-            <button class="num-btn" onclick="pressKey('8')">8</button>
-            <button class="num-btn" onclick="pressKey('9')">9</button>
-            <button class="num-btn" style="color:var(--red)" onclick="clearPin()">C</button>
-            <button class="num-btn" onclick="pressKey('0')">0</button>
-            <button class="num-btn" style="color:var(--accent)" onclick="resetDB()">🔄</button>
-        </div>
+  <div class="auth-bg-pattern"></div>
+  <div class="auth-card" style="max-width:360px">
+    <div class="logo-lockup" style="justify-content:center; margin-bottom:8px">
+      <div class="logo-icon">📚</div>
+      <div class="logo-text">Book<span>Flow</span></div>
     </div>
+    <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-bottom:4px">Ingresa tu PIN de acceso</p>
+    <div class="pin-display">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="numpad">
+      <button class="num-btn" onclick="pressKey('1')">1</button>
+      <button class="num-btn" onclick="pressKey('2')">2</button>
+      <button class="num-btn" onclick="pressKey('3')">3</button>
+      <button class="num-btn" onclick="pressKey('4')">4</button>
+      <button class="num-btn" onclick="pressKey('5')">5</button>
+      <button class="num-btn" onclick="pressKey('6')">6</button>
+      <button class="num-btn" onclick="pressKey('7')">7</button>
+      <button class="num-btn" onclick="pressKey('8')">8</button>
+      <button class="num-btn" onclick="pressKey('9')">9</button>
+      <button class="num-btn clear" onclick="clearPin()">⌫</button>
+      <button class="num-btn" onclick="pressKey('0')">0</button>
+      <button class="num-btn reset" onclick="resetDB()" title="Cambiar base de datos">⚙️</button>
+    </div>
+    <p id="pin-error" style="text-align:center; font-size:12px; color:var(--red); margin-top:12px; min-height:16px"></p>
+  </div>
 </div>
 
+<!-- MODAL: CLIENTE -->
+<div class="modal-backdrop" id="modal-client">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Nuevo Cliente</h3>
+      <button class="modal-close" onclick="closeModal('modal-client')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre / Red Social</label>
+        <input type="text" id="cli-name" class="form-control" placeholder="Ej: @mariagomez_reads">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dirección de Envío</label>
+        <input type="text" id="cli-addr" class="form-control" placeholder="Calle, colonia, ciudad, CP">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono / Contacto (opcional)</label>
+        <input type="text" id="cli-phone" class="form-control" placeholder="+52 55 0000 0000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas</label>
+        <textarea id="cli-notes" class="form-control" rows="2" placeholder="Preferencias, observaciones..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-client')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveClient()">Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VENTA -->
+<div class="modal-backdrop" id="modal-sale">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3 class="modal-title">Registrar Venta / Abono</h3>
+      <button class="modal-close" onclick="closeModal('modal-sale')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Cliente</label>
+        <select id="sale-client" class="form-control"></select>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Monto Compra ($)</label>
+          <input type="number" id="sale-amount" class="form-control" value="0" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Abono Realizado ($)</label>
+          <input type="number" id="sale-paid" class="form-control" value="0" min="0" step="0.01">
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Cantidad de Libros</label>
+          <input type="number" id="sale-qty" class="form-control" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paquetería</label>
+          <input type="text" id="sale-courier" class="form-control" placeholder="DHL, FedEx, Correos...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Captura de Pantalla / Imagen</label>
+        <div class="img-upload-zone" id="sale-drop-zone">
+          <input type="file" id="sale-img-file" accept="image/*" onchange="handleImageSelect(this)">
+          <div class="img-upload-icon">📷</div>
+          <div class="img-upload-text"><strong>Click para subir</strong> o arrastra aquí</div>
+          <div class="img-upload-subtext">PNG, JPG, WEBP • Máx 5MB</div>
+        </div>
+        <div id="sale-img-preview-wrap" style="display:none; margin-top:10px">
+          <div class="img-preview-wrap" style="width:100%">
+            <img id="sale-img-preview" src="" alt="Preview">
+            <button class="img-remove-btn" onclick="removeImage()">✕</button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px; margin-bottom:0">
+          <label class="form-label" style="margin-bottom:5px">O pega un link de imagen</label>
+          <input type="url" id="sale-ss-url" class="form-control" placeholder="https://...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nota Adicional</label>
+        <textarea id="sale-note" class="form-control" rows="2" placeholder="Observaciones del pedido..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-sale')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSale()">💾 Guardar Venta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VISITA -->
+<div class="modal-backdrop" id="modal-visit">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Agendar Visita a Proveedor</h3>
+      <button class="modal-close" onclick="closeModal('modal-visit')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre del Proveedor</label>
+        <input type="text" id="vis-name" class="form-control" placeholder="Ej: Editorial Planeta">
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">Fecha de Visita</label>
+          <input type="date" id="vis-date" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora (opcional)</label>
+          <input type="time" id="vis-time" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ubicación / Dirección</label>
+        <input type="text" id="vis-loc" class="form-control" placeholder="Ciudad, dirección...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas de la Visita</label>
+        <textarea id="vis-notes" class="form-control" rows="2" placeholder="Propósito, productos a revisar..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-visit')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveVisit()">📅 Agendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: USUARIO -->
+<div class="modal-backdrop" id="modal-user">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Crear Usuario</h3>
+      <button class="modal-close" onclick="closeModal('modal-user')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nombre Completo</label>
+        <input type="text" id="usr-name" class="form-control" placeholder="Ej: Ana López">
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label">PIN (4 dígitos)</label>
+          <input type="number" id="usr-pin" class="form-control" placeholder="1234" max="9999" min="1000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rol</label>
+          <select id="usr-role" class="form-control">
+            <option value="cajero">Cajero / Vendedor</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-user')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">Crear Usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
 <div id="app" class="app" style="display:none">
-    <aside class="sidebar">
-        <div style="font-size:24px; font-weight:800; color:var(--accent); margin-bottom:40px">BookFlow</div>
-        <nav style="flex:1">
-            <button class="nav-btn active" onclick="showView('clients', this)">👥 Clientes & Acumulados</button>
-            <button class="nav-btn" onclick="showView('sales', this)">🛍️ Nueva Venta</button>
-            <button class="nav-btn" onclick="showView('visits', this)">🚐 Visitas Proveedores</button>
-            <button id="nav-admin" class="nav-btn" style="display:none" onclick="showView('admin', this)">📊 Panel Admin</button>
-            <button id="nav-users" class="nav-btn" style="display:none" onclick="showView('users', this)">🔑 Usuarios</button>
-        </nav>
-        <div id="current-user-tag" style="font-size:12px; color:var(--text-muted); border-top:1px solid var(--border); padding-top:15px">Usuario: -</div>
-    </aside>
 
-    <main class="main">
-        <header class="topbar">
-            <h2 id="view-title">Clientes</h2>
-            <div style="display:flex; gap:15px; align-items:center">
-                <button class="nav-btn" style="width:auto" onclick="syncAll()">🔄 Sincronizar</button>
-                <button class="nav-btn" style="color:var(--red); width:auto" onclick="location.reload()">Cerrar Sesión</button>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">📚</div>
+        <div class="sidebar-logo-text">Book<span>Flow</span></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Principal</div>
+        <button class="nav-btn active" onclick="showView('clients', this, 'Clientes')">
+          <span class="nav-icon">👥</span> Clientes & Acumulados
+        </button>
+        <button class="nav-btn" onclick="showView('sales', this, 'Nueva Venta')">
+          <span class="nav-icon">🛍️</span> Nueva Venta
+        </button>
+        <button class="nav-btn" onclick="showView('visits', this, 'Visitas')">
+          <span class="nav-icon">🚐</span> Visitas a Proveedores
+        </button>
+      </div>
+      <div class="nav-section" id="admin-section" style="display:none">
+        <div class="nav-section-label">Administración</div>
+        <button id="nav-admin" class="nav-btn" onclick="showView('admin', this, 'Panel Admin')">
+          <span class="nav-icon">📊</span> Panel Admin
+        </button>
+        <button id="nav-users" class="nav-btn" onclick="showView('users', this, 'Usuarios')">
+          <span class="nav-icon">🔑</span> Gestión de Personal
+        </button>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="user-avatar-text">?</div>
+        <div class="user-info">
+          <p id="current-user-name">-</p>
+          <small id="current-user-role">-</small>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px">
+        <button class="btn btn-ghost btn-sm" style="flex:1; color:rgba(255,255,255,0.5); border-color:rgba(255,255,255,0.1)" onclick="syncAll()">🔄 Sync</button>
+        <button class="btn btn-danger btn-sm" style="flex:1" onclick="location.reload()">Salir</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 id="view-title">Clientes & Acumulados</h2>
+        <p id="view-subtitle">Gestiona tus clientes y deudas</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="syncAll()">🔄 Sincronizar</button>
+        <button class="btn btn-danger btn-sm" onclick="location.reload()">Salir</button>
+      </div>
+    </header>
+
+    <section class="content">
+
+      <!-- ── CLIENTES ── -->
+      <div id="view-clients" class="view active">
+        <div class="view-toolbar">
+          <div class="view-toolbar-left">
+            <div class="search-bar">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="search-client" class="form-control" placeholder="Buscar cliente..." style="width:260px; padding-left:38px" oninput="renderClients()">
             </div>
-        </header>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-client')">+ Nuevo Cliente</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Dirección</th>
+                  <th>Libros</th>
+                  <th>Total</th>
+                  <th>Abonado</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+              <tbody id="table-clients"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-        <section class="content">
-            
-            <div id="view-clients" class="view active">
-                <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                    <input type="text" id="search-client" placeholder="Buscar cliente..." style="width:300px; margin:0" oninput="renderClients()">
-                    <button class="btn-p" style="width:auto" onclick="openClientForm()">+ Nuevo Cliente</button>
-                </div>
-                <div class="card">
-                    <table>
-                        <thead>
-                            <tr><th>Nombre / Red Social</th><th>Dirección de Envío</th><th>Libros</th><th>Total</th><th>Abonado</th><th>Resta</th></tr>
-                        </thead>
-                        <tbody id="table-clients"></tbody>
-                    </table>
-                </div>
+      <!-- ── VENTAS ── -->
+      <div id="view-sales" class="view">
+        <div class="view-toolbar">
+          <div>
+            <p style="font-size:14px; color:var(--text-muted)">Registra una nueva venta o abono de cliente</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-sale')">+ Registrar Venta</button>
+        </div>
+
+        <!-- Historial de ventas -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Historial de Ventas</span>
+            <div class="search-bar" style="width:220px">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="search-sales" class="form-control" placeholder="Buscar venta..." style="padding-left:36px; font-size:13px" oninput="renderSales()">
             </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Fecha</th><th>Cliente</th><th>Monto</th><th>Abono</th><th>Libros</th><th>Vendedor</th><th>Imagen</th></tr>
+              </thead>
+              <tbody id="table-sales"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-            <div id="view-sales" class="view">
-                <div class="card" style="max-width:600px; margin: 0 auto">
-                    <h3>Registrar Venta / Abono</h3>
-                    <form id="form-sale" style="margin-top:20px">
-                        <label>Cliente</label>
-                        <select id="sale-client" required></select>
-                        
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
-                            <div><label>Monto Compra ($)</label><input type="number" id="sale-amount" value="0"></div>
-                            <div><label>Abono Realizado ($)</label><input type="number" id="sale-paid" value="0"></div>
-                        </div>
-                        
-                        <label>Cantidad de Libros</label>
-                        <input type="number" id="sale-qty" value="1">
+      <!-- ── ADMIN ── -->
+      <div id="view-admin" class="view">
+        <div class="stats-grid">
+          <div class="stat-card orange">
+            <div class="stat-icon">💰</div>
+            <div class="stat-label">Ingresos Totales</div>
+            <div class="stat-value" id="adm-total-money">$0.00</div>
+            <div class="stat-sub">Suma de todas las ventas</div>
+          </div>
+          <div class="stat-card navy">
+            <div class="stat-icon">📚</div>
+            <div class="stat-label">Libros Acumulados</div>
+            <div class="stat-value" id="adm-total-books">0</div>
+            <div class="stat-sub">Total en todos los pedidos</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-label">Por Cobrar</div>
+            <div class="stat-value red" id="adm-total-debt">$0.00</div>
+            <div class="stat-sub">Deuda pendiente total</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Clientes Activos</div>
+            <div class="stat-value green" id="adm-total-clients">0</div>
+            <div class="stat-sub">Con historial de compras</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Ventas por Mes</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chart-sales"></canvas>
+          </div>
+        </div>
+      </div>
 
-                        <label>Captura de Pantalla (URL/Link)</label>
-                        <input type="text" id="sale-ss" placeholder="Pega el link de la imagen o nota">
+      <!-- ── USUARIOS ── -->
+      <div id="view-users" class="view">
+        <div class="view-toolbar">
+          <p style="font-size:14px; color:var(--text-muted)">Administra el acceso del personal</p>
+          <button class="btn btn-primary" onclick="openModal('modal-user')">+ Crear Usuario</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nombre</th><th>PIN</th><th>Rol</th><th></th></tr></thead>
+              <tbody id="table-users"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-                        <label>Paquetería de su agrado</label>
-                        <input type="text" id="sale-courier" placeholder="Ej: DHL, Correos, FedEx">
+      <!-- ── VISITAS ── -->
+      <div id="view-visits" class="view">
+        <div class="view-toolbar">
+          <p style="font-size:14px; color:var(--text-muted)">Agenda y consulta visitas a proveedores</p>
+          <button class="btn btn-primary" onclick="openModal('modal-visit')">+ Agendar Visita</button>
+        </div>
+        <div class="visits-grid" id="visits-container"></div>
+      </div>
 
-                        <button type="submit" class="btn-p" style="margin-top:20px">Guardar en el Acumulado</button>
-                    </form>
-                </div>
-            </div>
-
-            <div id="view-admin" class="view">
-                <div class="grid-stats">
-                    <div class="stat-card"><h3>Ingresos Totales</h3><p id="adm-total-money">$0.00</p></div>
-                    <div class="stat-card"><h3>Libros en Acumulados</h3><p id="adm-total-books">0</p></div>
-                    <div class="stat-card"><h3>Por Cobrar</h3><p id="adm-total-debt" style="color:var(--red)">$0.00</p></div>
-                </div>
-                <div class="card">
-                    <canvas id="chart-sales" height="100"></canvas>
-                </div>
-                
-            </div>
-
-            <div id="view-users" class="view">
-                <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                    <h2>Gestión de Personal</h2>
-                    <button class="btn-p" style="width:auto" onclick="openUserForm()">+ Crear Usuario</button>
-                </div>
-                <div class="card">
-                    <table>
-                        <thead><tr><th>Nombre</th><th>PIN</th><th>Rol</th><th>Acciones</th></tr></thead>
-                        <tbody id="table-users"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="view-visits" class="view">
-                <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                    <h2>Próximas Visitas a Proveedores</h2>
-                    <button class="btn-p" style="width:auto" onclick="openVisitForm()">+ Agendar Visita</button>
-                </div>
-                <div class="grid-stats" id="visits-container"></div>
-            </div>
-
-        </section>
-    </main>
+    </section>
+  </main>
 </div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobile-nav" style="display:none">
+  <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn active" onclick="showView('clients', this, 'Clientes'); setMobileActive(this)">
+      <span class="icon">👥</span> Clientes
+    </button>
+    <button class="mobile-nav-btn" onclick="showView('sales', this, 'Ventas'); setMobileActive(this)">
+      <span class="icon">🛍️</span> Ventas
+    </button>
+    <button class="mobile-nav-btn" onclick="openModal('modal-sale')">
+      <span class="icon" style="background:var(--accent); border-radius:50%; padding:6px; font-size:18px; line-height:1">＋</span>
+      Nueva
+    </button>
+    <button class="mobile-nav-btn" onclick="showView('visits', this, 'Visitas'); setMobileActive(this)">
+      <span class="icon">🚐</span> Visitas
+    </button>
+    <button class="mobile-nav-btn" id="mob-admin-btn" style="display:none" onclick="showView('admin', this, 'Admin'); setMobileActive(this)">
+      <span class="icon">📊</span> Admin
+    </button>
+  </div>
+</nav>
 
 <script>
+// ─── STATE ──────────────────────────────────────────────────────
 let state = {
-    url: localStorage.getItem('bf_url'),
-    user: null,
-    pin: "",
-    clients: [],
-    sales: [],
-    users: [],
-    visits: []
+  url: localStorage.getItem('bf_url'),
+  user: null,
+  pin: "",
+  clients: [],
+  sales: [],
+  users: [],
+  visits: [],
+  imageData: null, // base64 image
+  chart: null
 };
 
-// 1. CONEXIÓN
-async function connectDB() {
-    const url = document.getElementById('db-url').value;
-    if(!url.startsWith('https://')) return toast("URL inválida", "red");
-    
-    try {
-        localStorage.setItem('bf_url', url);
-        state.url = url;
-        const res = await api('read', { tab: 'Usuarios' });
-        if(res.ok) {
-            if(res.rows.length === 0) {
-                await api('write', { tab: 'Usuarios', rows: [{id: '1', name: 'Admin', pin: '1234', role: 'admin'}] });
-            }
-            location.reload();
-        }
-    } catch(e) { toast("Error de conexión", "red"); }
+// ─── INIT ────────────────────────────────────────────────────────
+if (state.url) {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  api('read', { tab: 'Usuarios' }).then(res => {
+    state.users = res.rows || [];
+  }).catch(() => toast('Error al cargar usuarios', 'error'));
+} else {
+  document.getElementById('setup-screen').style.display = 'flex';
 }
 
+// ─── API ─────────────────────────────────────────────────────────
 async function api(action, body) {
-    const res = await fetch(state.url + (action === 'read' ? `?action=read&tab=${body.tab}` : ''), {
-        method: action === 'read' ? 'GET' : 'POST',
-        body: action === 'read' ? null : JSON.stringify({ action, ...body })
+  try {
+    const isRead = action === 'read';
+    const url = state.url + (isRead ? `?action=read&tab=${body.tab}` : '');
+    const res = await fetch(url, {
+      method: isRead ? 'GET' : 'POST',
+      body: isRead ? null : JSON.stringify({ action, ...body })
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
+  } catch (e) {
+    console.error('API Error:', e);
+    throw e;
+  }
 }
 
+// ─── CONNECT DB ──────────────────────────────────────────────────
+async function connectDB() {
+  const url = document.getElementById('db-url').value.trim();
+  if (!url.startsWith('https://')) return toast('URL inválida, debe comenzar con https://', 'error');
+  try {
+    localStorage.setItem('bf_url', url);
+    state.url = url;
+    const res = await api('read', { tab: 'Usuarios' });
+    if (res.ok) {
+      if (res.rows.length === 0) {
+        await api('write', { tab: 'Usuarios', rows: [{ id: '1', name: 'Admin', pin: '1234', role: 'admin' }] });
+        toast('¡Base conectada! Usuario Admin creado con PIN 1234', 'success');
+      }
+      location.reload();
+    }
+  } catch (e) { toast('Error de conexión, verifica la URL', 'error'); }
+}
+
+// ─── SYNC ────────────────────────────────────────────────────────
 async function syncAll() {
-    toast("Sincronizando...");
+  try {
+    toast('Sincronizando datos...');
     const [c, s, u, v] = await Promise.all([
-        api('read', { tab: 'Clientes' }), api('read', { tab: 'Ventas' }),
-        api('read', { tab: 'Usuarios' }), api('read', { tab: 'Visitas' })
+      api('read', { tab: 'Clientes' }),
+      api('read', { tab: 'Ventas' }),
+      api('read', { tab: 'Usuarios' }),
+      api('read', { tab: 'Visitas' })
     ]);
     state.clients = c.rows || [];
-    state.sales = s.rows || [];
-    state.users = u.rows || [];
-    state.visits = v.rows || [];
+    state.sales   = s.rows || [];
+    state.users   = u.rows || [];
+    state.visits  = v.rows || [];
     renderClients();
+    renderSales();
     renderVisits();
     renderUsers();
     renderDashboard();
     populateSelects();
+    toast('¡Sincronizado correctamente!', 'success');
+  } catch (e) { toast('Error al sincronizar', 'error'); }
 }
 
-// 2. PIN LOGIN
+// ─── LOGIN ───────────────────────────────────────────────────────
 function pressKey(n) {
-    if(state.pin.length < 4) {
-        state.pin += n;
-        document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('filled', i < state.pin.length));
-        if(state.pin.length === 4) attemptLogin();
-    }
+  if (state.pin.length < 4) {
+    state.pin += n;
+    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('filled', i < state.pin.length));
+    if (state.pin.length === 4) setTimeout(attemptLogin, 100);
+  }
 }
-function clearPin() { state.pin = ""; document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled')); }
+
+function clearPin() {
+  state.pin = "";
+  document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled'));
+  document.getElementById('pin-error').textContent = '';
+}
+
 function attemptLogin() {
-    const found = state.users.find(u => u.pin === state.pin);
-    if(found) {
-        state.user = found;
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app').style.display = 'grid';
-        document.getElementById('current-user-tag').textContent = `Usuario: ${found.name} (${found.role})`;
-        if(found.role === 'admin') {
-            document.getElementById('nav-admin').style.display = 'flex';
-            document.getElementById('nav-users').style.display = 'flex';
-        }
-        syncAll();
-    } else { toast("PIN Incorrecto", "red"); clearPin(); }
+  const found = state.users.find(u => String(u.pin) === state.pin);
+  if (found) {
+    state.user = found;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'grid';
+    document.getElementById('current-user-name').textContent = found.name;
+    document.getElementById('current-user-role').textContent = found.role === 'admin' ? 'Administrador' : 'Cajero / Vendedor';
+    document.getElementById('user-avatar-text').textContent = found.name.charAt(0).toUpperCase();
+    if (found.role === 'admin') {
+      document.getElementById('admin-section').style.display = 'block';
+      document.getElementById('mob-admin-btn').style.display = 'flex';
+    }
+    document.getElementById('mobile-nav').style.display = 'block';
+    syncAll();
+  } else {
+    document.getElementById('pin-error').textContent = 'PIN incorrecto, intenta de nuevo';
+    clearPin();
+    // Shake animation
+    document.querySelector('.auth-card').style.animation = 'none';
+    setTimeout(() => { document.querySelector('.auth-card').style.animation = ''; }, 10);
+  }
 }
 
-// 3. RENDERERS
-function showView(id, btn) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('view-' + id).classList.add('active');
-    document.getElementById('view-title').textContent = id.charAt(0).toUpperCase() + id.slice(1);
-    btn.classList.add('active');
+// ─── VIEWS ───────────────────────────────────────────────────────
+const viewTitles = {
+  clients: ['Clientes & Acumulados', 'Gestiona tus clientes y deudas'],
+  sales:   ['Ventas', 'Historial y registro de ventas'],
+  admin:   ['Panel Administrativo', 'Estadísticas y métricas del negocio'],
+  users:   ['Gestión de Personal', 'Administra usuarios y accesos'],
+  visits:  ['Visitas a Proveedores', 'Agenda de visitas programadas']
+};
+
+function showView(id, btn, title) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  const info = viewTitles[id] || [title || id, ''];
+  document.getElementById('view-title').textContent = info[0];
+  document.getElementById('view-subtitle').textContent = info[1];
 }
 
+function setMobileActive(btn) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ─── MODALS ──────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+  backdrop.addEventListener('click', e => {
+    if (e.target === backdrop) closeModal(backdrop.id);
+  });
+});
+
+// ─── CLIENTS ─────────────────────────────────────────────────────
 function renderClients() {
-    const search = document.getElementById('search-client').value.toLowerCase();
-    const tbody = document.getElementById('table-clients');
-    const filtered = state.clients.filter(c => c.name.toLowerCase().includes(search));
-    
-    tbody.innerHTML = filtered.map(c => {
-        const resta = parseFloat(c.totalDebt) - parseFloat(c.totalPaid);
-        return `<tr>
-            <td><b>${c.name}</b></td>
-            <td style="font-size:12px; color:var(--text-muted)">${c.address}</td>
-            <td class="mono">${c.bookCount}</td>
-            <td class="mono">$${parseFloat(c.totalDebt).toFixed(2)}</td>
-            <td class="mono" style="color:var(--green)">$${parseFloat(c.totalPaid).toFixed(2)}</td>
-            <td><span class="badge ${resta > 0 ? 'badge-debt' : 'badge-success'}">$${resta.toFixed(2)}</span></td>
-        </tr>`;
-    }).join('');
-}
+  const search = (document.getElementById('search-client').value || '').toLowerCase();
+  const tbody = document.getElementById('table-clients');
+  const filtered = state.clients.filter(c => c.name.toLowerCase().includes(search) || (c.address||'').toLowerCase().includes(search));
 
-function renderVisits() {
-    const container = document.getElementById('visits-container');
-    container.innerHTML = state.visits.map(v => `
-        <div class="stat-card">
-            <small>${v.date}</small>
-            <p style="font-size:18px">${v.providerName}</p>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:5px">📍 ${v.location}</div>
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6">
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <p>No se encontraron clientes</p>
+        <small>${search ? 'Intenta con otro término' : 'Agrega tu primer cliente con el botón "Nuevo Cliente"'}</small>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(c => {
+    const total  = parseFloat(c.totalDebt  || 0);
+    const paid   = parseFloat(c.totalPaid  || 0);
+    const resta  = total - paid;
+    const isDebt = resta > 0.01;
+    return `<tr>
+      <td>
+        <div class="client-name-cell">
+          <strong>${escHtml(c.name)}</strong>
+          ${c.phone ? `<small>📞 ${escHtml(c.phone)}</small>` : ''}
         </div>
-    `).join('');
+      </td>
+      <td style="font-size:12px; color:var(--text-muted); max-width:200px">${escHtml(c.address || '—')}</td>
+      <td class="mono" style="font-weight:600">${c.bookCount || 0}</td>
+      <td class="mono">$${total.toFixed(2)}</td>
+      <td class="mono" style="color:var(--green)">$${paid.toFixed(2)}</td>
+      <td>
+        <span class="badge ${isDebt ? 'badge-debt' : 'badge-ok'}">
+          ${isDebt ? '⚠' : '✓'} $${resta.toFixed(2)}
+        </span>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
+// ─── SALES ───────────────────────────────────────────────────────
+function renderSales() {
+  const search = (document.getElementById('search-sales')?.value || '').toLowerCase();
+  const tbody  = document.getElementById('table-sales');
+  const filtered = [...state.sales].reverse().filter(s =>
+    (s.customerName||'').toLowerCase().includes(search) ||
+    (s.sellerName||'').toLowerCase().includes(search)
+  );
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🛍️</div><p>Sin ventas registradas</p><small>Las ventas aparecerán aquí</small></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(s => {
+    const dt = s.date ? new Date(s.date).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'2-digit' }) : '—';
+    const imgSrc = s.screenshot || s.imageData || '';
+    const imgCell = imgSrc
+      ? `<img class="img-thumb" src="${imgSrc}" alt="Captura" onclick="openLightbox('${imgSrc}')">`
+      : `<span style="color:var(--text-light); font-size:12px">—</span>`;
+    return `<tr>
+      <td class="mono" style="font-size:12px">${dt}</td>
+      <td><strong>${escHtml(s.customerName||'—')}</strong></td>
+      <td class="mono" style="color:var(--accent)">$${parseFloat(s.amount||0).toFixed(2)}</td>
+      <td class="mono" style="color:var(--green)">$${parseFloat(s.payment||0).toFixed(2)}</td>
+      <td class="mono">${s.booksQty || 1}</td>
+      <td style="font-size:12px">${escHtml(s.sellerName||'—')}</td>
+      <td>${imgCell}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── VISITS ──────────────────────────────────────────────────────
+function renderVisits() {
+  const container = document.getElementById('visits-container');
+  if (state.visits.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🚐</div><p>Sin visitas agendadas</p><small>Agenda tu próxima visita a un proveedor</small></div>`;
+    return;
+  }
+  container.innerHTML = state.visits.map(v => {
+    const dt = v.date ? new Date(v.date + 'T00:00:00').toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' }) : v.date;
+    return `<div class="visit-card">
+      <button class="visit-delete" onclick="deleteRow('Visitas','${v.id}')">🗑</button>
+      <div class="visit-date">📅 ${dt}${v.time ? ' · ' + v.time : ''}</div>
+      <div class="visit-name">${escHtml(v.providerName)}</div>
+      <div class="visit-loc">📍 <span>${escHtml(v.location || '—')}</span></div>
+      ${v.notes ? `<p style="font-size:12px; color:var(--text-muted); margin-top:10px; border-top:1px solid var(--border); padding-top:10px">${escHtml(v.notes)}</p>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ─── USERS ───────────────────────────────────────────────────────
 function renderUsers() {
-    document.getElementById('table-users').innerHTML = state.users.map(u => `
-        <tr><td>${u.name}</td><td class="mono">${u.pin}</td><td>${u.role}</td><td><button onclick="deleteRow('Usuarios','${u.id}')">🗑</button></td></tr>
-    `).join('');
+  document.getElementById('table-users').innerHTML = state.users.map(u => `
+    <tr>
+      <td><strong>${escHtml(u.name)}</strong></td>
+      <td class="mono">${u.pin}</td>
+      <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-staff'}">${u.role === 'admin' ? '⭐ Admin' : '👤 Cajero'}</span></td>
+      <td>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteRow('Usuarios','${u.id}')" title="Eliminar">🗑</button>
+      </td>
+    </tr>
+  `).join('');
 }
 
+// ─── DASHBOARD ───────────────────────────────────────────────────
 function renderDashboard() {
-    const totalRev = state.sales.reduce((a, b) => a + parseFloat(b.amount), 0);
-    const totalBooks = state.clients.reduce((a, b) => a + parseInt(b.bookCount), 0);
-    const totalDebt = state.clients.reduce((a, b) => a + (parseFloat(b.totalDebt) - parseFloat(b.totalPaid)), 0);
-    
-    document.getElementById('adm-total-money').textContent = `$${totalRev.toFixed(2)}`;
-    document.getElementById('adm-total-books').textContent = totalBooks;
-    document.getElementById('adm-total-debt').textContent = `$${totalDebt.toFixed(2)}`;
+  const totalRev    = state.sales.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+  const totalBooks  = state.clients.reduce((a, b) => a + parseInt(b.bookCount || 0), 0);
+  const totalDebt   = state.clients.reduce((a, b) => a + (parseFloat(b.totalDebt || 0) - parseFloat(b.totalPaid || 0)), 0);
+  const activeClients = state.clients.filter(c => parseInt(c.bookCount || 0) > 0).length;
+
+  document.getElementById('adm-total-money').textContent   = `$${totalRev.toFixed(2)}`;
+  document.getElementById('adm-total-books').textContent   = totalBooks;
+  document.getElementById('adm-total-debt').textContent    = `$${totalDebt.toFixed(2)}`;
+  document.getElementById('adm-total-clients').textContent = activeClients;
+
+  // Chart
+  const monthly = {};
+  state.sales.forEach(s => {
+    if (!s.date) return;
+    const d = new Date(s.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    monthly[key] = (monthly[key] || 0) + parseFloat(s.amount || 0);
+  });
+  const sortedKeys = Object.keys(monthly).sort().slice(-6);
+  const labels = sortedKeys.map(k => {
+    const [y, m] = k.split('-');
+    return new Date(y, m-1).toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
+  });
+  const values = sortedKeys.map(k => monthly[k]);
+
+  const ctx = document.getElementById('chart-sales').getContext('2d');
+  if (state.chart) state.chart.destroy();
+  state.chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Ventas ($)',
+        data: values,
+        backgroundColor: 'rgba(200,105,42,0.18)',
+        borderColor: 'rgba(200,105,42,0.9)',
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'DM Sans' } } },
+        y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'DM Mono' }, callback: v => '$' + v.toFixed(0) } }
+      }
+    }
+  });
 }
 
 function populateSelects() {
-    document.getElementById('sale-client').innerHTML = state.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('sale-client').innerHTML = state.clients.length
+    ? state.clients.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('')
+    : '<option value="">— Sin clientes —</option>';
 }
 
-// 4. FORMS & ACTIONS
-async function openClientForm() {
-    const name = prompt("Nombre / Red Social:");
-    const addr = prompt("Dirección de envío:");
-    if(name && addr) {
-        await api('write', { tab: 'Clientes', rows: [{id: Date.now(), name, address: addr, totalDebt: 0, totalPaid: 0, bookCount: 0}] });
-        syncAll();
-    }
+// ─── SAVE ACTIONS ─────────────────────────────────────────────────
+async function saveClient() {
+  const name  = document.getElementById('cli-name').value.trim();
+  const addr  = document.getElementById('cli-addr').value.trim();
+  const phone = document.getElementById('cli-phone').value.trim();
+  const notes = document.getElementById('cli-notes').value.trim();
+  if (!name) return toast('El nombre es obligatorio', 'error');
+  try {
+    await api('write', { tab: 'Clientes', rows: [{ id: Date.now(), name, address: addr, phone, notes, totalDebt: 0, totalPaid: 0, bookCount: 0 }] });
+    closeModal('modal-client');
+    document.getElementById('cli-name').value = '';
+    document.getElementById('cli-addr').value = '';
+    document.getElementById('cli-phone').value = '';
+    document.getElementById('cli-notes').value = '';
+    toast('Cliente agregado correctamente', 'success');
+    syncAll();
+  } catch (e) { toast('Error al guardar cliente', 'error'); }
 }
 
-async function openUserForm() {
-    const name = prompt("Nombre:");
-    const pin = prompt("PIN (4 dígitos):");
-    const role = prompt("Rol (admin/cajero):");
-    if(name && pin) {
-        await api('write', { tab: 'Usuarios', rows: [{id: Date.now(), name, pin, role}] });
-        syncAll();
-    }
-}
+async function saveSale() {
+  const cid    = document.getElementById('sale-client').value;
+  const amount = parseFloat(document.getElementById('sale-amount').value) || 0;
+  const paid   = parseFloat(document.getElementById('sale-paid').value) || 0;
+  const qty    = parseInt(document.getElementById('sale-qty').value) || 1;
+  const cour   = document.getElementById('sale-courier').value.trim();
+  const url    = document.getElementById('sale-ss-url').value.trim();
+  const note   = document.getElementById('sale-note').value.trim();
 
-async function openVisitForm() {
-    const name = prompt("Nombre del Proveedor:");
-    const date = prompt("Fecha (AAAA-MM-DD):");
-    const loc = prompt("Ubicación:");
-    if(name && date) {
-        await api('write', { tab: 'Visitas', rows: [{id: Date.now(), providerName: name, date, location: loc}] });
-        syncAll();
-    }
-}
+  if (!cid) return toast('Selecciona un cliente', 'error');
+  const client = state.clients.find(c => String(c.id) === String(cid));
+  if (!client) return toast('Cliente no encontrado', 'error');
 
-document.getElementById('form-sale').onsubmit = async (e) => {
-    e.preventDefault();
-    const cid = document.getElementById('sale-client').value;
-    const amount = parseFloat(document.getElementById('sale-amount').value);
-    const paid = parseFloat(document.getElementById('sale-paid').value);
-    const qty = parseInt(document.getElementById('sale-qty').value);
-    const ss = document.getElementById('sale-ss').value;
-    const cour = document.getElementById('sale-courier').value;
+  const screenshotData = state.imageData || url || '';
 
-    const client = state.clients.find(c => c.id == cid);
-
+  try {
     await api('write', { tab: 'Ventas', rows: [{
-        id: Date.now(), date: new Date().toISOString(), customerId: cid, customerName: client.name,
-        amount, payment: paid, booksQty: qty, sellerName: state.user.name, screenshot: ss, courier: cour
+      id: Date.now(), date: new Date().toISOString(),
+      customerId: cid, customerName: client.name,
+      amount, payment: paid, booksQty: qty,
+      sellerName: state.user.name,
+      screenshot: screenshotData,
+      courier: cour, note
     }] });
 
     await api('updateRow', { tab: 'Clientes', idField: 'id', idValue: cid, updates: {
-        totalDebt: parseFloat(client.totalDebt) + amount,
-        totalPaid: parseFloat(client.totalPaid) + paid,
-        bookCount: parseInt(client.bookCount) + qty,
-        preferredCourier: cour
+      totalDebt: parseFloat(client.totalDebt || 0) + amount,
+      totalPaid: parseFloat(client.totalPaid || 0) + paid,
+      bookCount: parseInt(client.bookCount || 0) + qty,
+      preferredCourier: cour
     } });
 
-    toast("¡Venta y Acumulado guardado!", "green");
-    document.getElementById('form-sale').reset();
+    closeModal('modal-sale');
+    removeImage();
+    document.getElementById('sale-amount').value = '0';
+    document.getElementById('sale-paid').value = '0';
+    document.getElementById('sale-qty').value = '1';
+    document.getElementById('sale-courier').value = '';
+    document.getElementById('sale-ss-url').value = '';
+    document.getElementById('sale-note').value = '';
+    toast('¡Venta registrada correctamente!', 'success');
     syncAll();
-};
-
-function toast(m, c = "var(--accent)") {
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.style.borderLeftColor = c;
-    t.textContent = m;
-    document.getElementById('toast-container').appendChild(t);
-    setTimeout(() => t.remove(), 3000);
+  } catch (e) { toast('Error al guardar la venta', 'error'); }
 }
 
-function resetDB() { if(confirm("¿Cambiar de base de datos?")) { localStorage.removeItem('bf_url'); location.reload(); } }
-
-// INIT
-if(state.url) {
-    document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-    api('read', { tab: 'Usuarios' }).then(res => { state.users = res.rows || []; });
+async function saveVisit() {
+  const name  = document.getElementById('vis-name').value.trim();
+  const date  = document.getElementById('vis-date').value;
+  const time  = document.getElementById('vis-time').value;
+  const loc   = document.getElementById('vis-loc').value.trim();
+  const notes = document.getElementById('vis-notes').value.trim();
+  if (!name || !date) return toast('Nombre y fecha son obligatorios', 'error');
+  try {
+    await api('write', { tab: 'Visitas', rows: [{ id: Date.now(), providerName: name, date, time, location: loc, notes }] });
+    closeModal('modal-visit');
+    ['vis-name','vis-date','vis-time','vis-loc','vis-notes'].forEach(id => document.getElementById(id).value = '');
+    toast('¡Visita agendada!', 'success');
+    syncAll();
+  } catch (e) { toast('Error al agendar visita', 'error'); }
 }
+
+async function saveUser() {
+  const name = document.getElementById('usr-name').value.trim();
+  const pin  = document.getElementById('usr-pin').value.trim();
+  const role = document.getElementById('usr-role').value;
+  if (!name || !pin) return toast('Nombre y PIN son obligatorios', 'error');
+  if (pin.length !== 4 || !/^\d+$/.test(pin)) return toast('El PIN debe tener exactamente 4 dígitos', 'error');
+  if (state.users.find(u => u.pin === pin)) return toast('Este PIN ya está en uso', 'error');
+  try {
+    await api('write', { tab: 'Usuarios', rows: [{ id: Date.now(), name, pin, role }] });
+    closeModal('modal-user');
+    document.getElementById('usr-name').value = '';
+    document.getElementById('usr-pin').value = '';
+    toast('Usuario creado correctamente', 'success');
+    syncAll();
+  } catch (e) { toast('Error al crear usuario', 'error'); }
+}
+
+async function deleteRow(tab, id) {
+  if (!confirm('¿Seguro que deseas eliminar este registro?')) return;
+  try {
+    await api('deleteRow', { tab, idField: 'id', idValue: id });
+    toast('Registro eliminado', 'success');
+    syncAll();
+  } catch (e) { toast('Error al eliminar', 'error'); }
+}
+
+// ─── IMAGE HANDLING ───────────────────────────────────────────────
+function handleImageSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) return toast('La imagen no puede superar 5MB', 'error');
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.imageData = e.target.result;
+    document.getElementById('sale-img-preview').src = e.target.result;
+    document.getElementById('sale-img-preview-wrap').style.display = 'block';
+    document.getElementById('sale-drop-zone').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  state.imageData = null;
+  document.getElementById('sale-img-preview').src = '';
+  document.getElementById('sale-img-preview-wrap').style.display = 'none';
+  document.getElementById('sale-drop-zone').style.display = 'block';
+  document.getElementById('sale-img-file').value = '';
+}
+
+// Drag & Drop
+const dropZone = document.getElementById('sale-drop-zone');
+if (dropZone) {
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const input = document.getElementById('sale-img-file');
+      const dt = new DataTransfer(); dt.items.add(file);
+      input.files = dt.files;
+      handleImageSelect(input);
+    }
+  });
+}
+
+// ─── LIGHTBOX ────────────────────────────────────────────────────
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const icons = { success: '✅', error: '❌', info: '📌' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${icons[type] || '📌'}</span> ${msg}`;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'toastOut 0.3s forwards';
+    setTimeout(() => t.remove(), 300);
+  }, 3500);
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function resetDB() {
+  if (confirm('¿Cambiar la base de datos? Se cerrará la sesión actual.')) {
+    localStorage.removeItem('bf_url');
+    location.reload();
+  }
+}
+
+// ─── KEYBOARD SUPPORT ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  const loginVisible = document.getElementById('login-screen').style.display !== 'none';
+  if (loginVisible) {
+    if (e.key >= '0' && e.key <= '9') pressKey(e.key);
+    if (e.key === 'Backspace') clearPin();
+    if (e.key === 'Escape') clearPin();
+  }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
+    closeLightbox();
+    document.body.style.overflow = '';
+  }
+});
 </script>
 </body>
 </html>
