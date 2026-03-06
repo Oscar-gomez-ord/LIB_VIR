@@ -1138,15 +1138,21 @@ if (state.url) {
 }
 
 // ─── API ─────────────────────────────────────────────────────────
+// Apps Script redirige los POST (302) y fetch pierde el body en ese redirect.
+// Solución: codificar TODO como GET con el payload en un query param.
 async function api(action, body) {
-  const isRead = action === 'read';
-  const url = state.url + (isRead ? `?action=read&tab=${body.tab}` : '');
-  const res = await fetch(url, {
-    method: isRead ? 'GET' : 'POST',
-    body: isRead ? null : JSON.stringify({ action, ...body })
-  });
+  let url;
+  if (action === 'read') {
+    url = `${state.url}?action=read&tab=${encodeURIComponent(body.tab)}`;
+  } else {
+    const payload = encodeURIComponent(JSON.stringify({ action, ...body }));
+    url = `${state.url}?payload=${payload}`;
+  }
+  const res = await fetch(url, { redirect: 'follow' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.json();
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e) { throw new Error('Respuesta inválida del servidor: ' + text.slice(0, 120)); }
 }
 
 // ─── CONNECT DB ──────────────────────────────────────────────────
