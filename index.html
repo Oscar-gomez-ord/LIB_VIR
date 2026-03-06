@@ -103,8 +103,49 @@ body {
 .logo-text { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--navy); }
 .logo-text span { color: var(--accent); }
 
+/* ─── USER PICKER ────────────────────────── */
+.user-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 20px 0 8px;
+}
+.user-pick-card {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 18px 12px;
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+}
+.user-pick-card:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(200,105,42,0.15);
+}
+.user-pick-avatar {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800; color: white;
+  font-family: 'Playfair Display', serif;
+}
+.user-pick-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.user-pick-role { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
 /* ─── PIN PAD ────────────────────────────── */
-.pin-display { display: flex; gap: 16px; margin: 28px 0; justify-content: center; }
+.pin-step-back {
+  display: flex; align-items: center; gap: 8px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 13px; font-weight: 600;
+  margin-bottom: 16px; padding: 0;
+  transition: var(--transition);
+}
+.pin-step-back:hover { color: var(--accent); }
+
+.pin-display { display: flex; gap: 16px; margin: 24px 0; justify-content: center; }
 .pin-dot {
   width: 16px; height: 16px; border-radius: 50%;
   border: 2px solid var(--border2);
@@ -672,12 +713,30 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 <!-- LOGIN SCREEN -->
 <div id="login-screen" class="auth-screen" style="display:none">
   <div class="auth-bg-pattern"></div>
-  <div class="auth-card" style="max-width:360px">
-    <div class="logo-lockup" style="justify-content:center; margin-bottom:8px">
+
+  <!-- STEP 1: User Picker -->
+  <div class="auth-card" id="step-pick" style="max-width:480px">
+    <div class="logo-lockup" style="justify-content:center; margin-bottom:4px">
       <div class="logo-icon">📚</div>
       <div class="logo-text">Book<span>Flow</span></div>
     </div>
-    <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-bottom:4px">Ingresa tu PIN de acceso</p>
+    <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-bottom:2px">¿Quién eres?</p>
+    <div class="user-picker-grid" id="user-picker-grid">
+      <!-- populated by JS -->
+    </div>
+    <div style="text-align:center; margin-top:16px">
+      <button class="pin-step-back" style="font-size:11px; justify-content:center" onclick="resetDB()">⚙️ Cambiar base de datos</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: PIN Entry -->
+  <div class="auth-card" id="step-pin" style="max-width:340px; display:none">
+    <button class="pin-step-back" onclick="backToUserPicker()">← Cambiar usuario</button>
+    <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:8px">
+      <div id="pin-selected-avatar" style="width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:white;font-family:'Playfair Display',serif;margin-bottom:10px"></div>
+      <p style="font-weight:700; font-size:16px" id="pin-selected-name">—</p>
+      <p style="font-size:12px; color:var(--text-muted)" id="pin-selected-role">—</p>
+    </div>
     <div class="pin-display">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
@@ -693,7 +752,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
       <button class="num-btn" onclick="pressKey('9')">9</button>
       <button class="num-btn clear" onclick="clearPin()">⌫</button>
       <button class="num-btn" onclick="pressKey('0')">0</button>
-      <button class="num-btn reset" onclick="resetDB()" title="Cambiar base de datos">⚙️</button>
+      <button class="num-btn reset" onclick="clearPin()" title="Limpiar">✕</button>
     </div>
     <p id="pin-error" style="text-align:center; font-size:12px; color:var(--red); margin-top:12px; min-height:16px"></p>
   </div>
@@ -876,28 +935,8 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="sidebar-logo-text">Book<span>Flow</span></div>
       </div>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section">
-        <div class="nav-section-label">Principal</div>
-        <button class="nav-btn active" onclick="showView('clients', this, 'Clientes')">
-          <span class="nav-icon">👥</span> Clientes & Acumulados
-        </button>
-        <button class="nav-btn" onclick="showView('sales', this, 'Nueva Venta')">
-          <span class="nav-icon">🛍️</span> Nueva Venta
-        </button>
-        <button class="nav-btn" onclick="showView('visits', this, 'Visitas')">
-          <span class="nav-icon">🚐</span> Visitas a Proveedores
-        </button>
-      </div>
-      <div class="nav-section" id="admin-section" style="display:none">
-        <div class="nav-section-label">Administración</div>
-        <button id="nav-admin" class="nav-btn" onclick="showView('admin', this, 'Panel Admin')">
-          <span class="nav-icon">📊</span> Panel Admin
-        </button>
-        <button id="nav-users" class="nav-btn" onclick="showView('users', this, 'Usuarios')">
-          <span class="nav-icon">🔑</span> Gestión de Personal
-        </button>
-      </div>
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <!-- populated dynamically by buildNav() -->
     </nav>
     <div class="sidebar-footer">
       <div class="user-pill">
@@ -1057,38 +1096,25 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- MOBILE NAV -->
 <nav class="mobile-nav" id="mobile-nav" style="display:none">
-  <div class="mobile-nav-inner">
-    <button class="mobile-nav-btn active" onclick="showView('clients', this, 'Clientes'); setMobileActive(this)">
-      <span class="icon">👥</span> Clientes
-    </button>
-    <button class="mobile-nav-btn" onclick="showView('sales', this, 'Ventas'); setMobileActive(this)">
-      <span class="icon">🛍️</span> Ventas
-    </button>
-    <button class="mobile-nav-btn" onclick="openModal('modal-sale')">
-      <span class="icon" style="background:var(--accent); border-radius:50%; padding:6px; font-size:18px; line-height:1">＋</span>
-      Nueva
-    </button>
-    <button class="mobile-nav-btn" onclick="showView('visits', this, 'Visitas'); setMobileActive(this)">
-      <span class="icon">🚐</span> Visitas
-    </button>
-    <button class="mobile-nav-btn" id="mob-admin-btn" style="display:none" onclick="showView('admin', this, 'Admin'); setMobileActive(this)">
-      <span class="icon">📊</span> Admin
-    </button>
+  <div class="mobile-nav-inner" id="mobile-nav-inner">
+    <!-- populated dynamically by buildNav() -->
   </div>
 </nav>
 
 <script>
 // ─── STATE ──────────────────────────────────────────────────────
+const AVATAR_COLORS = ['#c8692a','#1e2d40','#2d7a5f','#7c3d8a','#1a6fa8','#b5452d','#3d6b2e'];
 let state = {
   url: localStorage.getItem('bf_url'),
   user: null,
+  selectedUser: null, // user chosen in picker, before PIN
   pin: "",
   clients: [],
   sales: [],
   users: [],
   visits: [],
-  imageData: null, // base64 image
-  chart: null
+  imageData: null,
+  chartInstance: null
 };
 
 // ─── INIT ────────────────────────────────────────────────────────
@@ -1097,26 +1123,25 @@ if (state.url) {
   document.getElementById('login-screen').style.display = 'flex';
   api('read', { tab: 'Usuarios' }).then(res => {
     state.users = res.rows || [];
-  }).catch(() => toast('Error al cargar usuarios', 'error'));
+    renderUserPicker();
+  }).catch(() => {
+    // show picker anyway, will show empty state
+    renderUserPicker();
+  });
 } else {
   document.getElementById('setup-screen').style.display = 'flex';
 }
 
 // ─── API ─────────────────────────────────────────────────────────
 async function api(action, body) {
-  try {
-    const isRead = action === 'read';
-    const url = state.url + (isRead ? `?action=read&tab=${body.tab}` : '');
-    const res = await fetch(url, {
-      method: isRead ? 'GET' : 'POST',
-      body: isRead ? null : JSON.stringify({ action, ...body })
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (e) {
-    console.error('API Error:', e);
-    throw e;
-  }
+  const isRead = action === 'read';
+  const url = state.url + (isRead ? `?action=read&tab=${body.tab}` : '');
+  const res = await fetch(url, {
+    method: isRead ? 'GET' : 'POST',
+    body: isRead ? null : JSON.stringify({ action, ...body })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
 }
 
 // ─── CONNECT DB ──────────────────────────────────────────────────
@@ -1128,7 +1153,7 @@ async function connectDB() {
     state.url = url;
     const res = await api('read', { tab: 'Usuarios' });
     if (res.ok) {
-      if (res.rows.length === 0) {
+      if (!res.rows || res.rows.length === 0) {
         await api('write', { tab: 'Usuarios', rows: [{ id: '1', name: 'Admin', pin: '1234', role: 'admin' }] });
         toast('¡Base conectada! Usuario Admin creado con PIN 1234', 'success');
       }
@@ -1140,7 +1165,6 @@ async function connectDB() {
 // ─── SYNC ────────────────────────────────────────────────────────
 async function syncAll() {
   try {
-    toast('Sincronizando datos...');
     const [c, s, u, v] = await Promise.all([
       api('read', { tab: 'Clientes' }),
       api('read', { tab: 'Ventas' }),
@@ -1157,66 +1181,170 @@ async function syncAll() {
     renderUsers();
     renderDashboard();
     populateSelects();
-    toast('¡Sincronizado correctamente!', 'success');
+    toast('¡Sincronizado!', 'success');
   } catch (e) { toast('Error al sincronizar', 'error'); }
 }
 
-// ─── LOGIN ───────────────────────────────────────────────────────
+// ─── USER PICKER ─────────────────────────────────────────────────
+function avatarColor(name) {
+  let hash = 0;
+  for (let c of name) hash = c.charCodeAt(0) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function renderUserPicker() {
+  const grid = document.getElementById('user-picker-grid');
+  if (!state.users.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--text-muted); font-size:13px">
+      No hay usuarios registrados.<br>
+      <button class="pin-step-back" style="margin-top:8px; justify-content:center" onclick="resetDB()">Reconectar base de datos</button>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = state.users.map((u, i) => {
+    const color = avatarColor(u.name);
+    const initial = u.name.charAt(0).toUpperCase();
+    const roleLabel = u.role === 'admin' ? 'Admin' : 'Cajero';
+    return `<button class="user-pick-card" onclick="selectUser(${i})">
+      <div class="user-pick-avatar" style="background:${color}">${initial}</div>
+      <div class="user-pick-name">${escHtml(u.name)}</div>
+      <div class="user-pick-role">${roleLabel}</div>
+    </button>`;
+  }).join('');
+}
+
+function selectUser(index) {
+  state.selectedUser = state.users[index];
+  state.pin = '';
+  // Update PIN card header
+  const u = state.selectedUser;
+  const color = avatarColor(u.name);
+  document.getElementById('pin-selected-avatar').style.background = color;
+  document.getElementById('pin-selected-avatar').textContent = u.name.charAt(0).toUpperCase();
+  document.getElementById('pin-selected-name').textContent = u.name;
+  document.getElementById('pin-selected-role').textContent = u.role === 'admin' ? 'Administrador' : 'Cajero / Vendedor';
+  document.getElementById('pin-error').textContent = '';
+  document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled'));
+  // Switch steps
+  document.getElementById('step-pick').style.display = 'none';
+  document.getElementById('step-pin').style.display = 'block';
+}
+
+function backToUserPicker() {
+  state.selectedUser = null;
+  state.pin = '';
+  document.getElementById('pin-error').textContent = '';
+  document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled'));
+  document.getElementById('step-pin').style.display = 'none';
+  document.getElementById('step-pick').style.display = 'block';
+}
+
+// ─── PIN ENTRY ────────────────────────────────────────────────────
 function pressKey(n) {
+  if (!state.selectedUser) return;
   if (state.pin.length < 4) {
     state.pin += n;
     document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('filled', i < state.pin.length));
-    if (state.pin.length === 4) setTimeout(attemptLogin, 100);
+    if (state.pin.length === 4) setTimeout(attemptLogin, 120);
   }
 }
 
 function clearPin() {
-  state.pin = "";
+  state.pin = '';
   document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled'));
   document.getElementById('pin-error').textContent = '';
 }
 
 function attemptLogin() {
-  const found = state.users.find(u => String(u.pin) === state.pin);
-  if (found) {
-    state.user = found;
+  const u = state.selectedUser;
+  if (!u) return;
+  if (String(u.pin) === state.pin) {
+    state.user = u;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'grid';
-    document.getElementById('current-user-name').textContent = found.name;
-    document.getElementById('current-user-role').textContent = found.role === 'admin' ? 'Administrador' : 'Cajero / Vendedor';
-    document.getElementById('user-avatar-text').textContent = found.name.charAt(0).toUpperCase();
-    if (found.role === 'admin') {
-      document.getElementById('admin-section').style.display = 'block';
-      document.getElementById('mob-admin-btn').style.display = 'flex';
-    }
+    // Populate sidebar user info
+    const color = avatarColor(u.name);
+    document.getElementById('user-avatar-text').style.background = color;
+    document.getElementById('user-avatar-text').textContent = u.name.charAt(0).toUpperCase();
+    document.getElementById('current-user-name').textContent = u.name;
+    document.getElementById('current-user-role').textContent = u.role === 'admin' ? 'Administrador' : 'Cajero / Vendedor';
+    // Build dynamic nav
+    buildNav(u.role);
     document.getElementById('mobile-nav').style.display = 'block';
     syncAll();
   } else {
-    document.getElementById('pin-error').textContent = 'PIN incorrecto, intenta de nuevo';
+    document.getElementById('pin-error').textContent = 'PIN incorrecto';
     clearPin();
-    // Shake animation
-    document.querySelector('.auth-card').style.animation = 'none';
-    setTimeout(() => { document.querySelector('.auth-card').style.animation = ''; }, 10);
+    document.getElementById('step-pin').style.animation = 'none';
+    setTimeout(() => { document.getElementById('step-pin').style.animation = ''; }, 10);
   }
 }
 
+// ─── DYNAMIC NAV ─────────────────────────────────────────────────
+const NAV_ITEMS = [
+  { id:'clients', icon:'👥', label:'Clientes & Acumulados', short:'Clientes', roles:['admin','cajero'] },
+  { id:'sales',   icon:'🛍️', label:'Ventas',               short:'Ventas',   roles:['admin','cajero'] },
+  { id:'visits',  icon:'🚐', label:'Visitas a Proveedores', short:'Visitas',  roles:['admin','cajero'] },
+  { id:'admin',   icon:'📊', label:'Panel Admin',           short:'Admin',    roles:['admin'] },
+  { id:'users',   icon:'🔑', label:'Gestión de Personal',   short:'Personal', roles:['admin'] },
+];
+
+function buildNav(role) {
+  const allowed = NAV_ITEMS.filter(n => n.roles.includes(role));
+  const general = allowed.filter(n => ['clients','sales','visits'].includes(n.id));
+  const adm     = allowed.filter(n => ['admin','users'].includes(n.id));
+
+  // Sidebar
+  let html = `<div class="nav-section"><div class="nav-section-label">Principal</div>`;
+  general.forEach((n,i) => {
+    html += `<button class="nav-btn${i===0?' active':''}" data-view="${n.id}" onclick="showView('${n.id}',this)">
+      <span class="nav-icon">${n.icon}</span> ${n.label}</button>`;
+  });
+  html += `</div>`;
+  if (adm.length) {
+    html += `<div class="nav-section"><div class="nav-section-label">Administración</div>`;
+    adm.forEach(n => {
+      html += `<button class="nav-btn" data-view="${n.id}" onclick="showView('${n.id}',this)">
+        <span class="nav-icon">${n.icon}</span> ${n.label}</button>`;
+    });
+    html += `</div>`;
+  }
+  document.getElementById('sidebar-nav').innerHTML = html;
+
+  // Mobile nav
+  const mItems = allowed.filter(n => n.id !== 'users');
+  const half   = Math.floor(mItems.length / 2);
+  let mhtml    = '';
+  mItems.slice(0, half).forEach((n,i) => {
+    mhtml += `<button class="mobile-nav-btn${i===0?' active':''}" data-view="${n.id}" onclick="showView('${n.id}',this);setMobileActive(this)">
+      <span class="icon">${n.icon}</span>${n.short}</button>`;
+  });
+  mhtml += `<button class="mobile-nav-btn" onclick="openModal('modal-sale')">
+    <span class="icon" style="background:var(--accent);border-radius:50%;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;font-size:18px;line-height:1">＋</span>Nueva</button>`;
+  mItems.slice(half).forEach(n => {
+    mhtml += `<button class="mobile-nav-btn" data-view="${n.id}" onclick="showView('${n.id}',this);setMobileActive(this)">
+      <span class="icon">${n.icon}</span>${n.short}</button>`;
+  });
+  document.getElementById('mobile-nav-inner').innerHTML = mhtml;
+}
+
 // ─── VIEWS ───────────────────────────────────────────────────────
-const viewTitles = {
-  clients: ['Clientes & Acumulados', 'Gestiona tus clientes y deudas'],
-  sales:   ['Ventas', 'Historial y registro de ventas'],
-  admin:   ['Panel Administrativo', 'Estadísticas y métricas del negocio'],
-  users:   ['Gestión de Personal', 'Administra usuarios y accesos'],
-  visits:  ['Visitas a Proveedores', 'Agenda de visitas programadas']
+const viewMeta = {
+  clients:['Clientes & Acumulados','Gestiona tus clientes y deudas'],
+  sales:  ['Ventas','Historial y registro de ventas'],
+  admin:  ['Panel Administrativo','Estadísticas y métricas del negocio'],
+  users:  ['Gestión de Personal','Administra usuarios y accesos'],
+  visits: ['Visitas a Proveedores','Agenda de visitas programadas']
 };
 
-function showView(id, btn, title) {
+function showView(id, btn) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + id).classList.add('active');
-  if (btn) btn.classList.add('active');
-  const info = viewTitles[id] || [title || id, ''];
-  document.getElementById('view-title').textContent = info[0];
-  document.getElementById('view-subtitle').textContent = info[1];
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === id));
+  const m = viewMeta[id] || [id,''];
+  document.getElementById('view-title').textContent    = m[0];
+  document.getElementById('view-subtitle').textContent = m[1];
+  if (id === 'admin') renderDashboard();
 }
 
 function setMobileActive(btn) {
@@ -1246,40 +1374,22 @@ document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
 function renderClients() {
   const search = (document.getElementById('search-client').value || '').toLowerCase();
   const tbody = document.getElementById('table-clients');
-  const filtered = state.clients.filter(c => c.name.toLowerCase().includes(search) || (c.address||'').toLowerCase().includes(search));
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6">
-      <div class="empty-state">
-        <div class="empty-icon">👥</div>
-        <p>No se encontraron clientes</p>
-        <small>${search ? 'Intenta con otro término' : 'Agrega tu primer cliente con el botón "Nuevo Cliente"'}</small>
-      </div>
-    </td></tr>`;
+  const filtered = state.clients.filter(c =>
+    (c.name||'').toLowerCase().includes(search) || (c.address||'').toLowerCase().includes(search)
+  );
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">👥</div><p>No se encontraron clientes</p><small>${search?'Intenta con otro término':'Agrega tu primer cliente'}</small></div></td></tr>`;
     return;
   }
-
   tbody.innerHTML = filtered.map(c => {
-    const total  = parseFloat(c.totalDebt  || 0);
-    const paid   = parseFloat(c.totalPaid  || 0);
-    const resta  = total - paid;
-    const isDebt = resta > 0.01;
+    const total=parseFloat(c.totalDebt||0), paid=parseFloat(c.totalPaid||0), resta=total-paid;
     return `<tr>
-      <td>
-        <div class="client-name-cell">
-          <strong>${escHtml(c.name)}</strong>
-          ${c.phone ? `<small>📞 ${escHtml(c.phone)}</small>` : ''}
-        </div>
-      </td>
-      <td style="font-size:12px; color:var(--text-muted); max-width:200px">${escHtml(c.address || '—')}</td>
-      <td class="mono" style="font-weight:600">${c.bookCount || 0}</td>
+      <td><div class="client-name-cell"><strong>${escHtml(c.name)}</strong>${c.phone?`<small>📞 ${escHtml(c.phone)}</small>`:''}</div></td>
+      <td style="font-size:12px;color:var(--text-muted);max-width:200px">${escHtml(c.address||'—')}</td>
+      <td class="mono" style="font-weight:600">${c.bookCount||0}</td>
       <td class="mono">$${total.toFixed(2)}</td>
       <td class="mono" style="color:var(--green)">$${paid.toFixed(2)}</td>
-      <td>
-        <span class="badge ${isDebt ? 'badge-debt' : 'badge-ok'}">
-          ${isDebt ? '⚠' : '✓'} $${resta.toFixed(2)}
-        </span>
-      </td>
+      <td><span class="badge ${resta>0.01?'badge-debt':'badge-ok'}">${resta>0.01?'⚠':'✓'} $${resta.toFixed(2)}</span></td>
     </tr>`;
   }).join('');
 }
@@ -1339,65 +1449,74 @@ function renderVisits() {
 function renderUsers() {
   document.getElementById('table-users').innerHTML = state.users.map(u => `
     <tr>
-      <td><strong>${escHtml(u.name)}</strong></td>
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:8px;background:${avatarColor(u.name)};display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:13px">${u.name.charAt(0).toUpperCase()}</div>
+        <strong>${escHtml(u.name)}</strong>
+      </div></td>
       <td class="mono">${u.pin}</td>
-      <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-staff'}">${u.role === 'admin' ? '⭐ Admin' : '👤 Cajero'}</span></td>
-      <td>
-        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteRow('Usuarios','${u.id}')" title="Eliminar">🗑</button>
-      </td>
-    </tr>
-  `).join('');
+      <td><span class="badge ${u.role==='admin'?'badge-admin':'badge-staff'}">${u.role==='admin'?'⭐ Admin':'👤 Cajero'}</span></td>
+      <td><button class="btn btn-danger btn-sm btn-icon" onclick="deleteRow('Usuarios','${u.id}')" title="Eliminar">🗑</button></td>
+    </tr>`).join('');
 }
 
-// ─── DASHBOARD ───────────────────────────────────────────────────
+// ─── DASHBOARD + CHART ───────────────────────────────────────────
 function renderDashboard() {
-  const totalRev    = state.sales.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
-  const totalBooks  = state.clients.reduce((a, b) => a + parseInt(b.bookCount || 0), 0);
-  const totalDebt   = state.clients.reduce((a, b) => a + (parseFloat(b.totalDebt || 0) - parseFloat(b.totalPaid || 0)), 0);
-  const activeClients = state.clients.filter(c => parseInt(c.bookCount || 0) > 0).length;
+  const totalRev      = state.sales.reduce((a,b) => a+parseFloat(b.amount||0), 0);
+  const totalBooks    = state.clients.reduce((a,b) => a+parseInt(b.bookCount||0), 0);
+  const totalDebt     = state.clients.reduce((a,b) => a+(parseFloat(b.totalDebt||0)-parseFloat(b.totalPaid||0)), 0);
+  const activeClients = state.clients.filter(c => parseInt(c.bookCount||0)>0).length;
 
   document.getElementById('adm-total-money').textContent   = `$${totalRev.toFixed(2)}`;
   document.getElementById('adm-total-books').textContent   = totalBooks;
   document.getElementById('adm-total-debt').textContent    = `$${totalDebt.toFixed(2)}`;
   document.getElementById('adm-total-clients').textContent = activeClients;
 
-  // Chart
+  // Build monthly aggregation
   const monthly = {};
   state.sales.forEach(s => {
     if (!s.date) return;
     const d = new Date(s.date);
+    if (isNaN(d)) return;
     const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    monthly[key] = (monthly[key] || 0) + parseFloat(s.amount || 0);
+    monthly[key] = (monthly[key]||0) + parseFloat(s.amount||0);
   });
-  const sortedKeys = Object.keys(monthly).sort().slice(-6);
-  const labels = sortedKeys.map(k => {
-    const [y, m] = k.split('-');
-    return new Date(y, m-1).toLocaleDateString('es-MX', { month: 'short', year: '2-digit' });
-  });
-  const values = sortedKeys.map(k => monthly[k]);
+  if (!Object.keys(monthly).length) {
+    const n = new Date();
+    monthly[`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`] = 0;
+  }
+  const keys   = Object.keys(monthly).sort().slice(-8);
+  const labels = keys.map(k => { const [y,m]=k.split('-'); return new Date(y,m-1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}); });
+  const values = keys.map(k => monthly[k]);
 
-  const ctx = document.getElementById('chart-sales').getContext('2d');
-  if (state.chart) state.chart.destroy();
-  state.chart = new Chart(ctx, {
+  // Safely destroy previous chart
+  if (state.chartInstance) { try { state.chartInstance.destroy(); } catch(e){} state.chartInstance = null; }
+
+  // Replace canvas node to guarantee a clean state
+  const oldCanvas = document.getElementById('chart-sales');
+  const wrap = oldCanvas.parentNode;
+  const nc = document.createElement('canvas');
+  nc.id = 'chart-sales';
+  wrap.replaceChild(nc, oldCanvas);
+
+  state.chartInstance = new Chart(nc.getContext('2d'), {
     type: 'bar',
     data: {
       labels,
       datasets: [{
         label: 'Ventas ($)',
         data: values,
-        backgroundColor: 'rgba(200,105,42,0.18)',
-        borderColor: 'rgba(200,105,42,0.9)',
-        borderWidth: 2,
-        borderRadius: 6,
-        borderSkipped: false,
+        backgroundColor: keys.map((_,i) => i===keys.length-1 ? 'rgba(200,105,42,0.85)' : 'rgba(200,105,42,0.22)'),
+        borderColor: 'rgba(200,105,42,1)',
+        borderWidth: 2, borderRadius: 8, borderSkipped: false
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      animation: { duration: 700, easing: 'easeOutQuart' },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}` } } },
       scales: {
-        x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'DM Sans' } } },
-        y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'DM Mono' }, callback: v => '$' + v.toFixed(0) } }
+        x: { grid: { color: 'rgba(30,45,64,0.05)' }, ticks: { font: { family:'DM Sans', size:12 }, color:'#7a6f62' } },
+        y: { grid: { color: 'rgba(30,45,64,0.05)' }, ticks: { font: { family:'DM Mono', size:11 }, color:'#7a6f62', callback: v => '$'+v.toFixed(0) }, beginAtZero: true }
       }
     }
   });
@@ -1593,15 +1712,15 @@ function resetDB() {
 // ─── KEYBOARD SUPPORT ─────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   const loginVisible = document.getElementById('login-screen').style.display !== 'none';
-  if (loginVisible) {
+  const pinVisible   = document.getElementById('step-pin') && document.getElementById('step-pin').style.display !== 'none';
+  if (loginVisible && pinVisible) {
     if (e.key >= '0' && e.key <= '9') pressKey(e.key);
     if (e.key === 'Backspace') clearPin();
-    if (e.key === 'Escape') clearPin();
+    if (e.key === 'Escape') backToUserPicker();
   }
   if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.modal-backdrop.open').forEach(m => { m.classList.remove('open'); document.body.style.overflow = ''; });
     closeLightbox();
-    document.body.style.overflow = '';
   }
 });
 </script>
