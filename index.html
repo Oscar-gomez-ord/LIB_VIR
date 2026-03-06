@@ -3,62 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookFlow Pro — Librería Virtual</title>
+    <title>BookFlow Cloud | Librería Virtual</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f172a; --surface: #1e293b; --accent: #6366f1;
-            --text: #f8fafc; --text-soft: #94a3b8; --border: rgba(255,255,255,0.1);
-            --success: #22c55e; --danger: #f43f5e; --radius: 16px;
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --primary: #4f46e5;
+            --secondary: #818cf8;
+            --text: #1f2937;
+            --text-soft: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius: 12px;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
 
-        /* Pantalla de Bloqueo PIN */
-        .lock-screen {
-            position: fixed; inset: 0; background: var(--bg); z-index: 1000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+
+        /* Pantalla de Instalación y Login */
+        .overlay-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 2000;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
         }
-        .pin-dots { display: flex; gap: 20px; margin-bottom: 30px; }
-        .dot { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 50%; }
-        .dot.active { background: var(--accent); box-shadow: 0 0 15px var(--accent); }
-        .numpad { display: grid; grid-template-columns: repeat(3, 80px); gap: 15px; }
-        .num-btn { 
-            width: 80px; height: 80px; border-radius: 50%; border: 1px solid var(--border);
-            background: var(--surface); color: white; font-size: 24px; cursor: pointer; transition: 0.2s;
+        .card-setup {
+            background: var(--surface); padding: 40px; border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 450px;
+            text-align: center;
         }
-        .num-btn:hover { background: var(--accent); }
+
+        /* PIN Pad Estilo Moderno */
+        .pin-display { display: flex; justify-content: center; gap: 15px; margin: 25px 0; }
+        .pin-dot { width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 50%; transition: 0.2s; }
+        .pin-dot.active { background: var(--primary); border-color: var(--primary); transform: scale(1.2); }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; }
+        .num-btn {
+            background: var(--surface); border: 1px solid var(--border); padding: 20px;
+            border-radius: 12px; font-size: 1.5rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .num-btn:hover { background: var(--bg); color: var(--primary); }
 
         /* Layout Principal */
-        .app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
-        .sidebar { background: #020617; padding: 30px; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .logo { font-family: 'Syne', sans-serif; font-size: 24px; margin-bottom: 40px; color: var(--accent); }
-        .nav-btn {
-            padding: 14px 18px; border-radius: 12px; border: none; background: transparent;
-            color: var(--text-soft); text-align: left; cursor: pointer; margin-bottom: 5px; font-weight: 600;
+        .app-layout { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
+        .sidebar { background: #111827; color: white; padding: 30px; display: flex; flex-direction: column; }
+        .nav-link {
+            padding: 12px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 8px;
+            transition: 0.2s; display: flex; align-items: center; gap: 10px; font-weight: 500; color: #9ca3af;
         }
-        .nav-btn.active { background: var(--accent); color: white; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-link.active { background: var(--primary); color: white; }
 
-        /* Dashboard Admin */
-        .main { padding: 40px; overflow-y: auto; }
-        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: var(--surface); padding: 25px; border-radius: var(--radius); border: 1px solid var(--border); }
-        .stat-val { font-size: 32px; font-weight: 800; display: block; margin-top: 10px; }
+        .main-content { padding: 40px; overflow-y: auto; background: var(--bg); }
         
-        /* Tablas */
-        .table-container { background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: rgba(0,0,0,0.2); padding: 15px; text-align: left; font-size: 12px; color: var(--text-soft); }
-        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
-        
-        /* Formularios */
-        .form-card { max-width: 600px; background: var(--surface); padding: 30px; border-radius: 20px; }
-        input, select, textarea {
-            width: 100%; padding: 12px; background: #0f172a; border: 1px solid var(--border);
-            border-radius: 10px; color: white; margin-top: 8px; margin-bottom: 20px;
+        /* Dashboard Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card {
+            background: var(--surface); padding: 24px; border-radius: var(--radius);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary);
         }
-        .btn-main { background: var(--accent); color: white; padding: 15px; border: none; border-radius: 12px; width: 100%; cursor: pointer; font-weight: 700; }
+        .stat-card h3 { font-size: 14px; color: var(--text-soft); text-transform: uppercase; }
+        .stat-card p { font-size: 24px; font-weight: 700; margin-top: 10px; }
+
+        /* Tablas */
+        .data-table {
+            width: 100%; background: var(--surface); border-radius: var(--radius);
+            overflow: hidden; border-collapse: collapse; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .data-table th { background: #f9fafb; padding: 15px; text-align: left; font-size: 12px; color: var(--text-soft); }
+        .data-table td { padding: 15px; border-top: 1px solid var(--border); font-size: 14px; }
+
+        /* Botones y Formas */
+        .btn {
+            padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
+            font-weight: 600; transition: 0.2s; font-size: 14px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        
+        input, select, textarea {
+            width: 100%; padding: 12px; border: 1px solid var(--border);
+            border-radius: 8px; margin-top: 8px; margin-bottom: 15px;
+        }
 
         .view { display: none; }
         .view.active { display: block; }
@@ -66,234 +93,360 @@
 </head>
 <body>
 
-    <div id="lock-screen" class="lock-screen">
-        <div class="logo">BOOKFLOW <span>ACCESS</span></div>
-        <div class="pin-dots" id="pin-dots">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        </div>
-        <div class="numpad">
-            <button class="num-btn" onclick="pressKey('1')">1</button>
-            <button class="num-btn" onclick="pressKey('2')">2</button>
-            <button class="num-btn" onclick="pressKey('3')">3</button>
-            <button class="num-btn" onclick="pressKey('4')">4</button>
-            <button class="num-btn" onclick="pressKey('5')">5</button>
-            <button class="num-btn" onclick="pressKey('6')">6</button>
-            <button class="num-btn" onclick="pressKey('7')">7</button>
-            <button class="num-btn" onclick="pressKey('8')">8</button>
-            <button class="num-btn" onclick="pressKey('9')">9</button>
-            <button class="num-btn" style="color:var(--danger)" onclick="clearPin()">C</button>
-            <button class="num-btn" onclick="pressKey('0')">0</button>
+    <div id="setup-screen" class="overlay-screen">
+        <div class="card-setup">
+            <h2 id="setup-title" style="margin-bottom: 10px;">Inicializar BookFlow</h2>
+            <p id="setup-desc" style="color: var(--text-soft); margin-bottom: 25px;">Ingresa la URL de tu base de datos para comenzar.</p>
+            
+            <div id="setup-inputs">
+                <input type="text" id="db-url" placeholder="https://script.google.com/macros/s/...">
+                <button class="btn btn-primary" style="width: 100%; padding: 15px;" onclick="saveDatabaseUrl()">Conectar y Continuar</button>
+            </div>
+
+            <div id="login-input" style="display: none;">
+                <div class="pin-display" id="pin-display">
+                    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+                </div>
+                <div class="numpad">
+                    <button class="num-btn" onclick="pressPin('1')">1</button>
+                    <button class="num-btn" onclick="pressPin('2')">2</button>
+                    <button class="num-btn" onclick="pressPin('3')">3</button>
+                    <button class="num-btn" onclick="pressPin('4')">4</button>
+                    <button class="num-btn" onclick="pressPin('5')">5</button>
+                    <button class="num-btn" onclick="pressPin('6')">6</button>
+                    <button class="num-btn" onclick="pressPin('7')">7</button>
+                    <button class="num-btn" onclick="pressPin('8')">8</button>
+                    <button class="num-btn" onclick="pressPin('9')">9</button>
+                    <button class="num-btn" onclick="clearPin()" style="color: var(--danger)">C</button>
+                    <button class="num-btn" onclick="pressPin('0')">0</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="app">
+    <div class="app-layout">
         <aside class="sidebar">
-            <div class="logo">BookFlow Pro</div>
-            <nav style="flex:1">
-                <button class="nav-btn active" onclick="showView('clients')">👥 Clientes</button>
-                <button class="nav-btn" onclick="showView('sales')">📝 Registrar Venta</button>
-                <button class="nav-btn" onclick="showView('providers')">🏠 Proveedores</button>
-                <button id="admin-nav" class="nav-btn" style="display:none" onclick="showView('admin')">📊 Panel Admin</button>
+            <h1 style="font-family: 'Syne'; margin-bottom: 40px; color: white;">BookFlow</h1>
+            <nav style="flex: 1">
+                <div class="nav-link active" onclick="showView('dashboard')">📊 Dashboard</div>
+                <div class="nav-link" onclick="showView('clients')">👥 Clientes & Acumulados</div>
+                <div class="nav-link" onclick="showView('pos')">🛒 Nueva Venta</div>
+                <div id="admin-only-nav" style="display: none;">
+                    <div class="nav-link" onclick="showView('users')">🔑 Gestionar Usuarios</div>
+                </div>
             </nav>
-            <div id="user-tag" style="font-size: 12px; color: var(--text-soft)">Usuario: -</div>
-            <button class="nav-btn" style="color:var(--danger)" onclick="location.reload()">Cerrar Sesión</button>
+            <div id="user-info" style="font-size: 12px; color: #6b7280; border-top: 1px solid #374151; padding-top: 20px;">
+                Sesión: <span id="current-user-name" style="color: white">Cargando...</span>
+            </div>
         </aside>
 
-        <main class="main">
-            <section id="view-clients" class="view active">
-                <h2>Directorio de Acumulados</h2>
-                <div class="table-container" style="margin-top: 20px;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Dirección Completa</th>
-                                <th>Libros</th>
-                                <th>Total</th>
-                                <th>Abonado</th>
-                                <th>Resta</th>
-                            </tr>
-                        </thead>
-                        <tbody id="client-table-body"></tbody>
-                    </table>
+        <main class="main-content">
+            <section id="view-dashboard" class="view active">
+                <h2 style="margin-bottom: 25px;">Resumen Administrativo</h2>
+                <div class="stats-grid">
+                    <div class="stat-card"><h3>Ingresos del Mes</h3><p id="stat-revenue">$0</p></div>
+                    <div class="stat-card" style="border-left-color: #10b981;"><h3>Libros Vendidos</h3><p id="stat-books">0</p></div>
+                    <div class="stat-card" style="border-left-color: #f59e0b;"><h3>Cuentas Pendientes</h3><p id="stat-debt">$0</p></div>
+                    <div class="stat-card" style="border-left-color: #ec4899;"><h3>Total Clientes</h3><p id="stat-clients">0</p></div>
+                </div>
+                <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <canvas id="mainChart" height="100"></canvas>
                 </div>
             </section>
 
-            <section id="view-sales" class="view">
-                <h2>Registrar Nueva Compra/Abono</h2>
-                <div class="form-card" style="margin-top: 20px;">
+            <section id="view-clients" class="view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2>Clientes y Direcciones</h2>
+                    <button class="btn btn-primary" onclick="openClientModal()">+ Nuevo Cliente</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Dirección Completa</th>
+                            <th>Libros</th>
+                            <th>Total Acumulado</th>
+                            <th>Abonado</th>
+                            <th>Resta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="client-table-body"></tbody>
+                </table>
+            </section>
+
+            <section id="view-users" class="view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2>Gestión de Usuarios</h2>
+                    <button class="btn btn-primary" onclick="openUserModal()">+ Crear Usuario</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Rol</th>
+                            <th>PIN (4 Dígitos)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body"></tbody>
+                </table>
+            </section>
+
+            <section id="view-pos" class="view">
+                <h2>Registrar Compra</h2>
+                <div style="background: white; padding: 30px; border-radius: 12px; margin-top: 20px; max-width: 600px;">
                     <form id="sale-form">
                         <label>Seleccionar Cliente</label>
                         <select id="sale-client-select" required></select>
                         
-                        <label>Cantidad de Libros comprados hoy</label>
-                        <input type="number" id="sale-qty" value="1" required>
+                        <label>Monto Total de esta compra ($)</label>
+                        <input type="number" id="sale-total" required>
 
-                        <label>Monto de la Venta ($)</label>
-                        <input type="number" id="sale-amount" placeholder="0.00" required>
+                        <label>Abono actual ($)</label>
+                        <input type="number" id="sale-paid" value="0" required>
 
-                        <label>Abono Realizado ($)</label>
-                        <input type="number" id="sale-payment" placeholder="0.00" value="0">
+                        <label>Cantidad de Libros</label>
+                        <input type="number" id="sale-books" value="1" required>
 
-                        <button type="submit" class="btn-main">Guardar en Histórico</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">Registrar en Acumulado</button>
                     </form>
                 </div>
-            </section>
-
-            <section id="view-admin" class="view">
-                <h2>Métricas de Negocio</h2>
-                <div class="grid-stats">
-                    <div class="stat-card">
-                        <span class="stat-lbl">Ingresos Totales</span>
-                        <span class="stat-val" id="stat-revenue">$0.00</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-lbl">Libros Vendidos</span>
-                        <span class="stat-val" id="stat-books">0</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-lbl">Cuentas por Cobrar</span>
-                        <span class="stat-val" style="color:var(--danger)" id="stat-debt">$0.00</span>
-                    </div>
-                </div>
-                
-                <div style="background: var(--surface); padding: 20px; border-radius: 16px;">
-                    <canvas id="salesChart" height="100"></canvas>
-                </div>
-                
             </section>
         </main>
     </div>
 
-    <script>
-        // CONFIGURACIÓN (REEMPLAZA CON TU URL)
-        const SCRIPT_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
+    <div id="modal-container" class="overlay-screen" style="display: none; background: rgba(0,0,0,0.4);">
+        <div class="card-setup" style="text-align: left;">
+            <h3 id="modal-title" style="margin-bottom: 20px;">Título</h3>
+            <div id="modal-content"></div>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="saveModal()">Guardar</button>
+                <button class="btn" style="background: #e5e7eb;" onclick="closeModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
 
+    <script>
         let state = {
+            dbUrl: localStorage.getItem('bookflow_url'),
             currentUser: null,
+            pin: "",
             clients: [],
-            sales: [],
-            pin: ""
+            users: [],
+            sales: []
         };
 
-        // Usuarios (El admin puede añadir más desde la base de datos)
-        const mockUsers = [
-            { name: "Administrador", pin: "1234", role: "admin" },
-            { name: "Cajero 1", pin: "0000", role: "user" }
-        ];
+        // INICIALIZACIÓN
+        window.onload = async () => {
+            if (!state.dbUrl) {
+                document.getElementById('setup-screen').style.display = 'flex';
+            } else {
+                await syncData();
+                showLogin();
+            }
+        };
 
-        function pressKey(num) {
-            if (state.pin.length < 4) {
-                state.pin += num;
-                updatePinUI();
-                if (state.pin.length === 4) login();
+        async function syncData() {
+            const resU = await apiCall('read', { tab: 'Usuarios' });
+            if (resU.ok) state.users = resU.rows;
+            const resC = await apiCall('read', { tab: 'Clientes' });
+            if (resC.ok) state.clients = resC.rows;
+            const resS = await apiCall('read', { tab: 'Ventas' });
+            if (resS.ok) state.sales = resS.rows;
+        }
+
+        async function apiCall(action, body) {
+            try {
+                const res = await fetch(state.dbUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, ...body })
+                });
+                return await res.json();
+            } catch (e) { return { ok: false }; }
+        }
+
+        function saveDatabaseUrl() {
+            const url = document.getElementById('db-url').value;
+            if (url.startsWith('https://')) {
+                localStorage.setItem('bookflow_url', url);
+                state.dbUrl = url;
+                location.reload();
             }
         }
 
-        function updatePinUI() {
-            const dots = document.querySelectorAll('.dot');
-            dots.forEach((dot, i) => dot.classList.toggle('active', i < state.pin.length));
+        function showLogin() {
+            document.getElementById('setup-title').innerText = "Acceso BookFlow";
+            document.getElementById('setup-desc').innerText = "Ingresa tu PIN de 4 dígitos";
+            document.getElementById('setup-inputs').style.display = "none";
+            document.getElementById('login-input').style.display = "block";
+            // Si no hay usuarios, crear el primer admin
+            if (state.users.length === 0) {
+                apiCall('write', { tab: 'Usuarios', rows: [{ id: '1', name: 'Administrador', pin: '1234', role: 'admin' }] }).then(() => location.reload());
+            }
         }
 
-        function clearPin() { state.pin = ""; updatePinUI(); }
+        function pressPin(n) {
+            if (state.pin.length < 4) {
+                state.pin += n;
+                updatePinDots();
+                if (state.pin.length === 4) attemptLogin();
+            }
+        }
 
-        function login() {
-            const user = mockUsers.find(u => u.pin === state.pin);
+        function attemptLogin() {
+            const user = state.users.find(u => u.pin === state.pin);
             if (user) {
                 state.currentUser = user;
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('user-tag').textContent = "Usuario: " + user.name;
-                if (user.role === 'admin') document.getElementById('admin-nav').style.display = 'block';
-                loadData();
+                document.getElementById('setup-screen').style.display = 'none';
+                document.getElementById('current-user-name').innerText = user.name;
+                if (user.role === 'admin') document.getElementById('admin-only-nav').style.display = 'block';
+                renderClients();
+                renderDashboard();
+                renderUsers();
+                populateClientSelect();
             } else {
-                alert("PIN Incorrecto");
+                alert("PIN incorrecto");
                 clearPin();
             }
         }
 
-        function showView(viewId) {
+        function clearPin() { state.pin = ""; updatePinDots(); }
+        function updatePinDots() {
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i < state.pin.length));
+        }
+
+        function showView(view) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.add('active');
-            if(viewId === 'admin') renderCharts();
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('view-' + view).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        async function loadData() {
-            // Aquí llamarías a SCRIPT_URL para obtener datos reales
-            // Por ahora usaremos datos de ejemplo para visualizar el diseño
-            state.clients = [
-                { id: 1, name: "Ana López", address: "Calle Falsa 123, Int 4, CDMX", bookCount: 12, totalDebt: 4500, totalPaid: 2000 },
-                { id: 2, name: "Pedro Paramo", address: "Av. Siempre Viva 742, Col. Centro", bookCount: 5, totalDebt: 1200, totalPaid: 1200 }
-            ];
-            renderClients();
-        }
+        // --- DASHBOARD ---
+        function renderDashboard() {
+            const totalRev = state.sales.reduce((acc, s) => acc + parseFloat(s.amount), 0);
+            const totalBooks = state.sales.reduce((acc, s) => acc + parseInt(s.booksQty), 0);
+            const totalDebt = state.clients.reduce((acc, c) => acc + (parseFloat(c.totalDebt) - parseFloat(c.totalPaid)), 0);
+            
+            document.getElementById('stat-revenue').innerText = `$${totalRev.toLocaleString()}`;
+            document.getElementById('stat-books').innerText = totalBooks;
+            document.getElementById('stat-debt').innerText = `$${totalDebt.toLocaleString()}`;
+            document.getElementById('stat-clients').innerText = state.clients.length;
 
-        function renderClients() {
-            const body = document.getElementById('client-table-body');
-            const select = document.getElementById('sale-client-select');
-            body.innerHTML = "";
-            select.innerHTML = "";
-
-            state.clients.forEach(c => {
-                const rest = c.totalDebt - c.totalPaid;
-                body.innerHTML += `
-                    <tr>
-                        <td><strong>${c.name}</strong></td>
-                        <td style="color:var(--text-soft)">${c.address}</td>
-                        <td class="mono">${c.bookCount}</td>
-                        <td class="mono">$${c.totalDebt}</td>
-                        <td class="mono" style="color:var(--success)">$${c.totalPaid}</td>
-                        <td class="mono" style="color:${rest > 0 ? 'var(--danger)' : 'var(--success)'}">$${rest}</td>
-                    </tr>
-                `;
-                select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-            });
-        }
-
-        function renderCharts() {
-            const ctx = document.getElementById('salesChart').getContext('2d');
+            const ctx = document.getElementById('mainChart').getContext('2d');
             new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
+                    labels: ['Ventas', 'Libros', 'Abonos'],
                     datasets: [{
-                        label: 'Ventas Semanales',
-                        data: [1200, 1900, 3000, 5000, 2300, 3400, 4100],
-                        borderColor: '#6366f1',
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)'
+                        label: 'Rendimiento Mensual',
+                        data: [totalRev, totalBooks * 100, totalRev * 0.8],
+                        backgroundColor: ['#4f46e5', '#818cf8', '#10b981']
                     }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } } }
                 }
             });
         }
 
-        // Manejo de Formulario de Ventas
+        // --- CLIENTES ---
+        function renderClients() {
+            const tbody = document.getElementById('client-table-body');
+            tbody.innerHTML = state.clients.map(c => {
+                const resta = parseFloat(c.totalDebt) - parseFloat(c.totalPaid);
+                return `<tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td style="color: var(--text-soft)">${c.address}</td>
+                    <td>${c.bookCount}</td>
+                    <td>$${c.totalDebt}</td>
+                    <td style="color: var(--success)">$${c.totalPaid}</td>
+                    <td style="font-weight: bold; color: ${resta > 0 ? 'var(--danger)' : 'var(--success)'}">$${resta}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function populateClientSelect() {
+            const sel = document.getElementById('sale-client-select');
+            sel.innerHTML = state.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        // --- USUARIOS ---
+        function renderUsers() {
+            const tbody = document.getElementById('user-table-body');
+            tbody.innerHTML = state.users.map(u => `
+                <tr>
+                    <td>${u.name}</td>
+                    <td>${u.role}</td>
+                    <td><code>${u.pin}</code></td>
+                    <td><button class="btn btn-danger" onclick="deleteUser('${u.id}')">Eliminar</button></td>
+                </tr>
+            `).join('');
+        }
+
+        async function deleteUser(id) {
+            if(confirm("¿Eliminar usuario?")) {
+                await apiCall('deleteRow', { tab: 'Usuarios', idField: 'id', idValue: id });
+                location.reload();
+            }
+        }
+
+        // --- MODALES ---
+        function openUserModal() {
+            document.getElementById('modal-title').innerText = "Nuevo Usuario";
+            document.getElementById('modal-content').innerHTML = `
+                <input type="text" id="new-u-name" placeholder="Nombre">
+                <input type="text" id="new-u-pin" placeholder="PIN (4 dígitos)" maxlength="4">
+                <select id="new-u-role"><option value="admin">Administrador</option><option value="cajero">Cajero</option></select>
+            `;
+            state.modalMode = "USER";
+            document.getElementById('modal-container').style.display = "flex";
+        }
+
+        function openClientModal() {
+            document.getElementById('modal-title').innerText = "Nuevo Cliente";
+            document.getElementById('modal-content').innerHTML = `
+                <input type="text" id="new-c-name" placeholder="Nombre del cliente">
+                <textarea id="new-c-addr" placeholder="Dirección completa de envío"></textarea>
+                <input type="text" id="new-c-courier" placeholder="Paquetería preferida">
+            `;
+            state.modalMode = "CLIENT";
+            document.getElementById('modal-container').style.display = "flex";
+        }
+
+        async function saveModal() {
+            if (state.modalMode === "USER") {
+                const name = document.getElementById('new-u-name').value;
+                const pin = document.getElementById('new-u-pin').value;
+                const role = document.getElementById('new-u-role').value;
+                await apiCall('write', { tab: 'Usuarios', rows: [{ id: Date.now().toString(), name, pin, role }] });
+            } else if (state.modalMode === "CLIENT") {
+                const name = document.getElementById('new-c-name').value;
+                const address = document.getElementById('new-c-addr').value;
+                const courier = document.getElementById('new-c-courier').value;
+                await apiCall('write', { tab: 'Clientes', rows: [{ id: Date.now().toString(), name, address, courier, totalDebt: 0, totalPaid: 0, bookCount: 0 }] });
+            }
+            location.reload();
+        }
+
+        function closeModal() { document.getElementById('modal-container').style.display = "none"; }
+
+        // --- VENTAS ---
         document.getElementById('sale-form').onsubmit = async (e) => {
             e.preventDefault();
-            const payload = {
-                action: 'write',
-                tab: 'Ventas',
-                rows: [{
-                    id: Date.now(),
-                    date: new Date().toISOString(),
-                    customerId: document.getElementById('sale-client-select').value,
-                    customerName: document.getElementById('sale-client-select').selectedOptions[0].text,
-                    amount: document.getElementById('sale-amount').value,
-                    payment: document.getElementById('sale-payment').value,
-                    booksQty: document.getElementById('sale-qty').value,
-                    sellerName: state.currentUser.name
-                }]
-            };
-            
-            // Simulación de envío
-            console.log("Enviando a base de datos:", payload);
-            alert("Venta registrada con éxito");
-            showView('clients');
+            const cid = document.getElementById('sale-client-select').value;
+            const amount = parseFloat(document.getElementById('sale-total').value);
+            const paid = parseFloat(document.getElementById('sale-paid').value);
+            const books = parseInt(document.getElementById('sale-books').value);
+
+            const client = state.clients.find(c => c.id == cid);
+            const newDebt = parseFloat(client.totalDebt) + amount;
+            const newPaid = parseFloat(client.totalPaid) + paid;
+            const newBooks = parseInt(client.bookCount) + books;
+
+            await apiCall('write', { tab: 'Ventas', rows: [{ id: Date.now().toString(), date: new Date().toISOString(), customerId: cid, customerName: client.name, amount, payment: paid, booksQty: books, sellerName: state.currentUser.name }] });
+            await apiCall('updateRow', { tab: 'Clientes', idField: 'id', idValue: cid, updates: { totalDebt: newDebt, totalPaid: newPaid, bookCount: newBooks } });
+
+            alert("Venta registrada!");
+            location.reload();
         };
 
     </script>
