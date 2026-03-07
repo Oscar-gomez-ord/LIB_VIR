@@ -39,9 +39,7 @@
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
-
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
@@ -50,16 +48,15 @@ body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
-
 .mono { font-family: 'DM Mono', monospace; }
 .serif { font-family: 'Playfair Display', serif; }
 
-/* ─── SCROLLBAR ─────────────────────────── */
+/* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
 
-/* ─── AUTH SCREENS ───────────────────────── */
+/* ── AUTH SCREENS ── */
 .auth-screen {
   position: fixed; inset: 0;
   background: var(--bg);
@@ -68,14 +65,12 @@ body {
   padding: 20px;
   overflow-y: auto;
 }
-
 .auth-bg-pattern {
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background-image:
     radial-gradient(circle at 20% 30%, rgba(200,105,42,0.06) 0%, transparent 50%),
     radial-gradient(circle at 80% 70%, rgba(30,45,64,0.05) 0%, transparent 50%);
 }
-
 .auth-card {
   position: relative; z-index: 1;
   background: var(--surface);
@@ -86,12 +81,23 @@ body {
   box-shadow: var(--shadow-lg);
   animation: fadeUp 0.4s ease;
 }
-
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* ── Shake animation for wrong PIN ── */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  15%     { transform: translateX(-8px); }
+  30%     { transform: translateX(8px); }
+  45%     { transform: translateX(-6px); }
+  60%     { transform: translateX(6px); }
+  75%     { transform: translateX(-3px); }
+  90%     { transform: translateX(3px); }
+}
+.shake { animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important; }
 
+/* ── USER PICKER ── */
 .logo-lockup { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
 .logo-icon {
   width: 44px; height: 44px;
@@ -103,7 +109,6 @@ body {
 .logo-text { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--navy); }
 .logo-text span { color: var(--accent); }
 
-/* ─── USER PICKER ────────────────────────── */
 .user-picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -135,7 +140,7 @@ body {
 .user-pick-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.2; }
 .user-pick-role { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* ─── PIN PAD ────────────────────────────── */
+/* ── PIN PAD ── */
 .pin-step-back {
   display: flex; align-items: center; gap: 8px;
   background: none; border: none; cursor: pointer;
@@ -149,13 +154,18 @@ body {
 .pin-dot {
   width: 16px; height: 16px; border-radius: 50%;
   border: 2px solid var(--border2);
-  transition: var(--transition);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .pin-dot.filled {
   background: var(--accent);
   border-color: var(--accent);
   box-shadow: 0 0 12px rgba(200,105,42,0.4);
-  transform: scale(1.15);
+  transform: scale(1.2);
+}
+.pin-dot.error-state {
+  background: var(--red);
+  border-color: var(--red);
+  box-shadow: 0 0 12px rgba(192,57,43,0.35);
 }
 
 .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -173,11 +183,27 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 .num-btn:hover { background: var(--navy); color: white; transform: scale(1.05); border-color: var(--navy); }
-.num-btn:active { transform: scale(0.95); }
-.num-btn.clear { color: var(--red); }
-.num-btn.reset { font-size: 16px; }
+.num-btn:active { transform: scale(0.93); }
+.num-btn.backspace { color: var(--text-muted); font-size: 18px; }
+.num-btn.backspace:hover { color: white; }
+.num-btn.clear-all { color: var(--red); font-size: 15px; }
+.num-btn.clear-all:hover { background: var(--red); color: white; border-color: var(--red); }
 
-/* ─── APP LAYOUT ─────────────────────────── */
+/* Loading state for login button */
+.pin-loading {
+  display: flex; justify-content: center; align-items: center;
+  gap: 6px; padding: 8px 0; min-height: 24px;
+}
+.pin-loading span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+  animation: bounce 0.6s infinite alternate;
+}
+.pin-loading span:nth-child(2) { animation-delay: 0.15s; }
+.pin-loading span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { from { transform: translateY(0); opacity:0.5; } to { transform: translateY(-8px); opacity:1; } }
+
+/* ── APP LAYOUT ── */
 .app {
   display: grid;
   grid-template-columns: 270px 1fr;
@@ -185,10 +211,9 @@ body {
   overflow: hidden;
 }
 
-/* ─── SIDEBAR ────────────────────────────── */
+/* ── SIDEBAR ── */
 .sidebar {
   background: var(--navy);
-  padding: 0;
   display: flex; flex-direction: column;
   overflow: hidden;
   position: relative;
@@ -199,7 +224,6 @@ body {
   background: linear-gradient(160deg, rgba(200,105,42,0.08) 0%, transparent 60%);
   pointer-events: none;
 }
-
 .sidebar-header {
   padding: 28px 24px 20px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -212,15 +236,10 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 18px;
 }
-.sidebar-logo-text {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px; font-weight: 700;
-  color: #fff;
-}
+.sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #fff; }
 .sidebar-logo-text span { color: var(--accent); }
 
 .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
-
 .nav-section { margin-bottom: 8px; }
 .nav-section-label {
   font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
@@ -228,7 +247,6 @@ body {
   text-transform: uppercase;
   padding: 8px 12px 4px;
 }
-
 .nav-btn {
   display: flex; align-items: center; gap: 12px;
   padding: 11px 14px;
@@ -263,31 +281,23 @@ body {
 }
 .user-avatar {
   width: 32px; height: 32px; border-radius: 8px;
-  background: var(--accent);
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 700; color: white;
 }
 .user-info p { font-size: 13px; font-weight: 600; color: #fff; }
 .user-info small { font-size: 11px; color: rgba(255,255,255,0.4); }
 
-/* ─── MAIN ───────────────────────────────── */
+/* ── MAIN ── */
 .main { display: flex; flex-direction: column; overflow: hidden; }
-
 .topbar {
   height: 68px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between;
   padding: 0 30px;
-  box-shadow: 0 1px 0 var(--border);
   flex-shrink: 0;
 }
-.topbar-left h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px; font-weight: 700;
-  color: var(--navy);
-}
+.topbar-left h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--navy); }
 .topbar-left p { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
 .topbar-actions { display: flex; gap: 10px; align-items: center; }
 
@@ -310,25 +320,15 @@ body {
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 .btn-icon { padding: 9px; width: 38px; justify-content: center; }
 
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 28px 30px;
-  background: var(--bg);
-}
+.content { flex: 1; overflow-y: auto; padding: 28px 30px; background: var(--bg); }
 
-/* ─── VIEWS ──────────────────────────────── */
+/* ── VIEWS ── */
 .view { display: none; animation: fadeIn 0.25s ease; }
 .view.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ─── CARDS ──────────────────────────────── */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-}
+/* ── CARDS ── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-card); }
 .card-body { padding: 24px; }
 .card-header {
   padding: 20px 24px 0;
@@ -337,7 +337,7 @@ body {
 }
 .card-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; }
 
-/* ─── STAT CARDS ─────────────────────────── */
+/* ── STAT CARDS ── */
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
 .stat-card {
   background: var(--surface);
@@ -350,11 +350,8 @@ body {
 }
 .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 .stat-card::after {
-  content: '';
-  position: absolute; right: -10px; top: -10px;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  opacity: 0.06;
+  content: ''; position: absolute; right: -10px; top: -10px;
+  width: 80px; height: 80px; border-radius: 50%; opacity: 0.06;
 }
 .stat-card.orange::after { background: var(--accent); }
 .stat-card.green::after  { background: var(--green); }
@@ -368,7 +365,7 @@ body {
 .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
 .stat-icon { font-size: 22px; margin-bottom: 12px; }
 
-/* ─── TABLE ──────────────────────────────── */
+/* ── TABLE ── */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 600px; }
 thead tr { border-bottom: 2px solid var(--border); }
@@ -376,27 +373,25 @@ th {
   text-align: left; padding: 12px 16px;
   font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.8px;
-  color: var(--text-muted);
-  white-space: nowrap;
+  color: var(--text-muted); white-space: nowrap;
 }
 td { padding: 14px 16px; border-bottom: 1px solid var(--bg2); font-size: 14px; vertical-align: middle; }
 tbody tr { transition: var(--transition); }
 tbody tr:hover { background: var(--bg2); }
 tbody tr:last-child td { border-bottom: none; }
 
-/* ─── BADGES ─────────────────────────────── */
+/* ── BADGES ── */
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 4px 10px; border-radius: 99px;
-  font-size: 11px; font-weight: 700;
-  white-space: nowrap;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
 }
-.badge-debt   { background: var(--red-light);   color: var(--red);   border: 1px solid rgba(192,57,43,0.15); }
-.badge-ok     { background: var(--green-light);  color: var(--green); border: 1px solid rgba(45,122,95,0.15); }
-.badge-admin  { background: var(--accent-light); color: var(--accent);border: 1px solid rgba(200,105,42,0.15); }
-.badge-staff  { background: var(--amber-light);  color: var(--amber); border: 1px solid rgba(200,134,42,0.15); }
+.badge-debt   { background: var(--red-light);   color: var(--red);    border: 1px solid rgba(192,57,43,0.15); }
+.badge-ok     { background: var(--green-light);  color: var(--green);  border: 1px solid rgba(45,122,95,0.15); }
+.badge-admin  { background: var(--accent-light); color: var(--accent); border: 1px solid rgba(200,105,42,0.15); }
+.badge-staff  { background: var(--amber-light);  color: var(--amber);  border: 1px solid rgba(200,134,42,0.15); }
 
-/* ─── INPUTS ─────────────────────────────── */
+/* ── INPUTS ── */
 .form-group { margin-bottom: 18px; }
 .form-label {
   display: block; font-size: 12px; font-weight: 700;
@@ -410,26 +405,26 @@ tbody tr:last-child td { border-bottom: none; }
   border-radius: var(--radius-sm);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  transition: var(--transition);
-  outline: none;
-  appearance: none;
+  font-size: 14px; transition: var(--transition);
+  outline: none; appearance: none;
 }
 .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,105,42,0.12); background: var(--surface); }
 .form-control::placeholder { color: var(--text-light); }
-select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6f62' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
-
+select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6f62' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 36px; cursor: pointer;
+}
 .form-row { display: grid; gap: 16px; }
 .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
 .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 
-/* ─── IMAGE UPLOAD ───────────────────────── */
+/* ── IMAGE UPLOAD ── */
 .img-upload-zone {
   border: 2px dashed var(--border2);
   border-radius: var(--radius-sm);
   padding: 28px 20px;
-  text-align: center;
-  cursor: pointer;
+  text-align: center; cursor: pointer;
   transition: var(--transition);
   background: var(--bg);
   position: relative;
@@ -440,29 +435,18 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 .img-upload-text { font-size: 13px; color: var(--text-muted); }
 .img-upload-text strong { color: var(--accent); }
 .img-upload-subtext { font-size: 11px; color: var(--text-light); margin-top: 4px; }
-
-.img-preview-wrap {
-  position: relative; display: inline-block;
-  margin-top: 12px;
-}
-.img-preview-wrap img {
-  width: 100%; max-height: 180px; object-fit: cover;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-}
+.img-preview-wrap { position: relative; display: inline-block; margin-top: 12px; }
+.img-preview-wrap img { width: 100%; max-height: 180px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); }
 .img-remove-btn {
   position: absolute; top: -8px; right: -8px;
-  background: var(--red); color: white;
-  border: none; border-radius: 50%;
-  width: 24px; height: 24px;
-  display: flex; align-items: center; justify-content: center;
+  background: var(--red); color: white; border: none; border-radius: 50%;
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 13px;
 }
-
 .img-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; transition: var(--transition); }
 .img-thumb:hover { transform: scale(1.1); box-shadow: var(--shadow); }
 
-/* ─── MODAL ──────────────────────────────── */
+/* ── MODAL ── */
 .modal-backdrop {
   position: fixed; inset: 0;
   background: rgba(30,45,64,0.45);
@@ -478,8 +462,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
   background: var(--surface);
   border-radius: 18px;
   width: 100%; max-width: 520px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: 90vh; overflow-y: auto;
   box-shadow: var(--shadow-lg);
   transform: scale(0.95) translateY(10px);
   transition: var(--transition);
@@ -495,39 +478,34 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
   width: 34px; height: 34px; border-radius: 8px;
   background: var(--bg2); border: 1px solid var(--border);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 16px; color: var(--text-muted);
-  transition: var(--transition);
+  font-size: 16px; color: var(--text-muted); transition: var(--transition);
 }
 .modal-close:hover { background: var(--red-light); color: var(--red); }
 .modal-body { padding: 0 28px; }
 .modal-footer { padding: 20px 28px 28px; display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
 
-/* ─── SEARCH BAR ─────────────────────────── */
-.search-bar {
-  position: relative;
-}
-.search-bar input { padding-left: 38px; }
-.search-icon {
-  position: absolute; left: 12px; top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px; color: var(--text-muted);
-  pointer-events: none;
-}
+/* ── CONFIRM MODAL ── */
+.confirm-modal { max-width: 380px; }
+.confirm-modal .modal-body { padding: 0 28px 4px; }
+.confirm-modal p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
 
-/* ─── TOOLBAR ────────────────────────────── */
+/* ── SEARCH BAR ── */
+.search-bar { position: relative; }
+.search-bar input { padding-left: 38px; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text-muted); pointer-events: none; }
+
+/* ── TOOLBAR ── */
 .view-toolbar {
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
 }
 .view-toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-/* ─── TOAST ──────────────────────────────── */
+/* ── TOAST ── */
 #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
 .toast {
-  background: var(--navy);
-  color: white;
-  padding: 14px 20px;
-  border-radius: 10px;
+  background: var(--navy); color: white;
+  padding: 14px 20px; border-radius: 10px;
   border-left: 4px solid var(--accent);
   box-shadow: var(--shadow-lg);
   font-size: 14px; font-weight: 500;
@@ -537,17 +515,16 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 }
 .toast.success { border-left-color: var(--green); }
 .toast.error   { border-left-color: var(--red); }
-@keyframes toastIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastIn  { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(110%); opacity: 0; } }
 
-/* ─── VISITS ─────────────────────────────── */
+/* ── VISITS ── */
 .visits-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .visit-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: var(--shadow-card);
+  padding: 20px; box-shadow: var(--shadow-card);
   transition: var(--transition);
   position: relative; overflow: hidden;
 }
@@ -570,16 +547,13 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 .visit-card:hover .visit-delete { opacity: 1; }
 .visit-delete:hover { background: var(--red-light); color: var(--red); border-color: rgba(192,57,43,0.2); }
 
-/* ─── EMPTY STATE ────────────────────────── */
-.empty-state {
-  text-align: center; padding: 60px 20px;
-  color: var(--text-muted);
-}
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
 .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.6; }
 .empty-state p { font-size: 15px; margin-bottom: 6px; color: var(--text); font-weight: 500; }
 .empty-state small { font-size: 13px; color: var(--text-muted); }
 
-/* ─── SETUP SCREEN ───────────────────────── */
+/* ── SETUP SCREEN ── */
 .setup-step { margin-bottom: 28px; }
 .step-num {
   display: inline-flex; align-items: center; justify-content: center;
@@ -588,28 +562,26 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
   font-size: 13px; font-weight: 700; margin-bottom: 12px;
 }
 
-/* ─── IMAGE LIGHTBOX ─────────────────────── */
+/* ── LIGHTBOX ── */
 .lightbox {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.85);
   z-index: 9998;
   display: flex; align-items: center; justify-content: center;
   padding: 20px;
-  opacity: 0; pointer-events: none;
-  transition: var(--transition);
+  opacity: 0; pointer-events: none; transition: var(--transition);
 }
 .lightbox.open { opacity: 1; pointer-events: all; }
 .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
 .lightbox-close {
   position: absolute; top: 20px; right: 20px;
-  background: rgba(255,255,255,0.15); color: white;
-  border: none; border-radius: 50%;
-  width: 44px; height: 44px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; cursor: pointer;
+  background: rgba(255,255,255,0.15); color: white; border: none; border-radius: 50%;
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; cursor: pointer; transition: var(--transition);
 }
+.lightbox-close:hover { background: rgba(255,255,255,0.3); }
 
-/* ─── MOBILE NAV ─────────────────────────── */
+/* ── MOBILE NAV ── */
 .mobile-nav {
   display: none;
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -631,27 +603,19 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 .mobile-nav-btn .icon { font-size: 20px; }
 .mobile-nav-btn.active { color: var(--accent); }
 
-/* ─── CHART WRAPPER ──────────────────────── */
+/* ── CHART ── */
 .chart-wrap { padding: 20px; height: 280px; }
 
-/* ─── CLIENT DETAIL ──────────────────────── */
+/* ── HELPERS ── */
 .client-name-cell { display: flex; flex-direction: column; gap: 2px; }
 .client-name-cell strong { font-weight: 600; }
 .client-name-cell small { font-size: 11px; color: var(--text-muted); }
-
-/* ─── DIVIDER ────────────────────────────── */
 .divider { height: 1px; background: var(--border); margin: 20px 0; }
 
-/* ─────────────── RESPONSIVE ─────────────── */
+/* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   body { overflow: auto; }
-
-  .app {
-    grid-template-columns: 1fr;
-    height: auto;
-    min-height: 100vh;
-    padding-bottom: 72px;
-  }
+  .app { grid-template-columns: 1fr; height: auto; min-height: 100vh; padding-bottom: 72px; }
   .sidebar { display: none; }
   .main { height: auto; overflow: visible; }
   .content { overflow: visible; padding: 16px; }
@@ -668,7 +632,6 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
   .modal-backdrop { align-items: flex-end; padding: 0; }
   .auth-card { padding: 28px 20px; }
 }
-
 @media (max-width: 400px) {
   .stats-grid { grid-template-columns: 1fr; }
   .numpad { gap: 8px; }
@@ -682,8 +645,25 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close">✕</button>
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-backdrop" id="modal-confirm">
+  <div class="modal confirm-modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Confirmar acción</h3>
+      <button class="modal-close" onclick="closeModal('modal-confirm')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg">¿Seguro que deseas eliminar este registro?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="">Eliminar</button>
+    </div>
+  </div>
 </div>
 
 <!-- SETUP SCREEN -->
@@ -703,7 +683,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
         <input type="url" id="db-url" class="form-control" placeholder="https://script.google.com/macros/s/...">
       </div>
     </div>
-    <button class="btn btn-primary" style="width:100%; padding:14px; font-size:15px" onclick="connectDB()">
+    <button class="btn btn-primary" id="connect-btn" style="width:100%; padding:14px; font-size:15px" onclick="connectDB()">
       📚 Inicializar BookFlow
     </button>
     <p style="text-align:center; margin-top:16px; font-size:12px; color:var(--text-light)">Tus datos se guardan de forma segura en Google Sheets</p>
@@ -721,9 +701,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
       <div class="logo-text">Book<span>Flow</span></div>
     </div>
     <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-bottom:2px">¿Quién eres?</p>
-    <div class="user-picker-grid" id="user-picker-grid">
-      <!-- populated by JS -->
-    </div>
+    <div class="user-picker-grid" id="user-picker-grid"></div>
     <div style="text-align:center; margin-top:16px">
       <button class="pin-step-back" style="font-size:11px; justify-content:center" onclick="resetDB()">⚙️ Cambiar base de datos</button>
     </div>
@@ -733,12 +711,18 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
   <div class="auth-card" id="step-pin" style="max-width:340px; display:none">
     <button class="pin-step-back" onclick="backToUserPicker()">← Cambiar usuario</button>
     <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:8px">
-      <div id="pin-selected-avatar" style="width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:white;font-family:'Playfair Display',serif;margin-bottom:10px"></div>
+      <div id="pin-selected-avatar" style="width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:white;font-family:'Playfair Display',serif;margin-bottom:10px;transition:var(--transition)"></div>
       <p style="font-weight:700; font-size:16px" id="pin-selected-name">—</p>
       <p style="font-size:12px; color:var(--text-muted)" id="pin-selected-role">—</p>
     </div>
-    <div class="pin-display">
-      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    <div class="pin-display" id="pin-dots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div id="pin-status" style="min-height:24px; display:flex; justify-content:center; align-items:center; margin-bottom:12px">
+      <p id="pin-error" style="text-align:center; font-size:12px; color:var(--red);"></p>
     </div>
     <div class="numpad">
       <button class="num-btn" onclick="pressKey('1')">1</button>
@@ -750,11 +734,11 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
       <button class="num-btn" onclick="pressKey('7')">7</button>
       <button class="num-btn" onclick="pressKey('8')">8</button>
       <button class="num-btn" onclick="pressKey('9')">9</button>
-      <button class="num-btn clear" onclick="clearPin()">⌫</button>
+      <!-- BUG FIX: ⌫ now deletes single digit, ✕ clears all -->
+      <button class="num-btn backspace" onclick="deleteLastDigit()" title="Borrar último dígito">⌫</button>
       <button class="num-btn" onclick="pressKey('0')">0</button>
-      <button class="num-btn reset" onclick="clearPin()" title="Limpiar">✕</button>
+      <button class="num-btn clear-all" onclick="clearPin()" title="Borrar todo">✕</button>
     </div>
-    <p id="pin-error" style="text-align:center; font-size:12px; color:var(--red); margin-top:12px; min-height:16px"></p>
   </div>
 </div>
 
@@ -926,8 +910,6 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- APP -->
 <div id="app" class="app" style="display:none">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
@@ -935,9 +917,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
         <div class="sidebar-logo-text">Book<span>Flow</span></div>
       </div>
     </div>
-    <nav class="sidebar-nav" id="sidebar-nav">
-      <!-- populated dynamically by buildNav() -->
-    </nav>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
     <div class="sidebar-footer">
       <div class="user-pill">
         <div class="user-avatar" id="user-avatar-text">?</div>
@@ -953,7 +933,6 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
     <header class="topbar">
       <div class="topbar-left">
@@ -968,7 +947,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 
     <section class="content">
 
-      <!-- ── CLIENTES ── -->
+      <!-- CLIENTES -->
       <div id="view-clients" class="view active">
         <div class="view-toolbar">
           <div class="view-toolbar-left">
@@ -984,12 +963,8 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
             <table>
               <thead>
                 <tr>
-                  <th>Cliente</th>
-                  <th>Dirección</th>
-                  <th>Libros</th>
-                  <th>Total</th>
-                  <th>Abonado</th>
-                  <th>Saldo</th>
+                  <th>Cliente</th><th>Dirección</th><th>Libros</th>
+                  <th>Total</th><th>Abonado</th><th>Saldo</th>
                 </tr>
               </thead>
               <tbody id="table-clients"></tbody>
@@ -998,7 +973,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
       </div>
 
-      <!-- ── VENTAS ── -->
+      <!-- VENTAS -->
       <div id="view-sales" class="view">
         <div class="view-toolbar">
           <div>
@@ -1006,8 +981,6 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
           </div>
           <button class="btn btn-primary" onclick="openModal('modal-sale')">+ Registrar Venta</button>
         </div>
-
-        <!-- Historial de ventas -->
         <div class="card">
           <div class="card-header">
             <span class="card-title">Historial de Ventas</span>
@@ -1027,7 +1000,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
       </div>
 
-      <!-- ── ADMIN ── -->
+      <!-- ADMIN -->
       <div id="view-admin" class="view">
         <div class="stats-grid">
           <div class="stat-card orange">
@@ -1065,7 +1038,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
       </div>
 
-      <!-- ── USUARIOS ── -->
+      <!-- USUARIOS -->
       <div id="view-users" class="view">
         <div class="view-toolbar">
           <p style="font-size:14px; color:var(--text-muted)">Administra el acceso del personal</p>
@@ -1081,7 +1054,7 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
         </div>
       </div>
 
-      <!-- ── VISITAS ── -->
+      <!-- VISITAS -->
       <div id="view-visits" class="view">
         <div class="view-toolbar">
           <p style="font-size:14px; color:var(--text-muted)">Agenda y consulta visitas a proveedores</p>
@@ -1096,19 +1069,21 @@ select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='ht
 
 <!-- MOBILE NAV -->
 <nav class="mobile-nav" id="mobile-nav" style="display:none">
-  <div class="mobile-nav-inner" id="mobile-nav-inner">
-    <!-- populated dynamically by buildNav() -->
-  </div>
+  <div class="mobile-nav-inner" id="mobile-nav-inner"></div>
 </nav>
 
 <script>
-// ─── STATE ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
 const AVATAR_COLORS = ['#c8692a','#1e2d40','#2d7a5f','#7c3d8a','#1a6fa8','#b5452d','#3d6b2e'];
+
 let state = {
   url: localStorage.getItem('bf_url'),
   user: null,
-  selectedUser: null, // user chosen in picker, before PIN
-  pin: "",
+  selectedUser: null,
+  pin: '',
+  pinLocked: false,          // ← BUG FIX: prevents key presses during validation
   clients: [],
   sales: [],
   users: [],
@@ -1117,29 +1092,35 @@ let state = {
   chartInstance: null
 };
 
-// ─── INIT ────────────────────────────────────────────────────────
-if (state.url) {
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  api('read', { tab: 'Usuarios' })
-    .then(res => {
-      state.users = Array.isArray(res.rows) ? res.rows : [];
-      renderUserPicker();
-    })
-    .catch(() => {
-      // Error de red o script inválido: volver al setup limpiando la URL
-      localStorage.removeItem('bf_url');
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('setup-screen').style.display = 'flex';
-      setTimeout(() => toast('No se pudo conectar — verifica la URL del script', 'error'), 300);
-    });
-} else {
-  document.getElementById('setup-screen').style.display = 'flex';
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+(function init() {
+  if (state.url) {
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    loadUsers();
+  } else {
+    document.getElementById('setup-screen').style.display = 'flex';
+  }
+})();
+
+async function loadUsers() {
+  try {
+    const res = await api('read', { tab: 'Usuarios' });
+    state.users = Array.isArray(res.rows) ? res.rows : [];
+    renderUserPicker();
+  } catch (e) {
+    localStorage.removeItem('bf_url');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('setup-screen').style.display = 'flex';
+    setTimeout(() => toast('No se pudo conectar — verifica la URL del script', 'error'), 300);
+  }
 }
 
-// ─── API ─────────────────────────────────────────────────────────
-// Apps Script redirige los POST (302) y fetch pierde el body en ese redirect.
-// Solución: codificar TODO como GET con el payload en un query param.
+// ═══════════════════════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════════════════════
 async function api(action, body) {
   let url;
   if (action === 'read') {
@@ -1152,15 +1133,17 @@ async function api(action, body) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const text = await res.text();
   try { return JSON.parse(text); }
-  catch(e) { throw new Error('Respuesta inválida del servidor: ' + text.slice(0, 120)); }
+  catch(e) { throw new Error('Respuesta inválida: ' + text.slice(0, 120)); }
 }
 
-// ─── CONNECT DB ──────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  CONNECT DB
+// ═══════════════════════════════════════════════════════════════
 async function connectDB() {
   const url = document.getElementById('db-url').value.trim();
   if (!url.startsWith('https://')) return toast('URL inválida, debe comenzar con https://', 'error');
 
-  const btn = document.querySelector('#setup-screen .btn-primary');
+  const btn = document.getElementById('connect-btn');
   btn.textContent = 'Conectando...';
   btn.disabled = true;
 
@@ -1168,17 +1151,12 @@ async function connectDB() {
     localStorage.setItem('bf_url', url);
     state.url = url;
 
-    // Intentar leer usuarios — si la hoja es nueva vendrá rows:[]
     let rows = [];
     try {
       const res = await api('read', { tab: 'Usuarios' });
       rows = Array.isArray(res.rows) ? res.rows : [];
-    } catch (_) {
-      // Si la primera lectura falla (hoja aún sin inicializar) lo ignoramos
-      rows = [];
-    }
+    } catch (_) { rows = []; }
 
-    // Si no hay ningún usuario, crear Admin por defecto
     if (rows.length === 0) {
       await api('write', {
         tab: 'Usuarios',
@@ -1190,9 +1168,7 @@ async function connectDB() {
     }
 
     setTimeout(() => location.reload(), 800);
-
   } catch (e) {
-    // Si algo falla, limpiamos para no dejar URL inválida guardada
     localStorage.removeItem('bf_url');
     state.url = null;
     btn.textContent = '📚 Inicializar BookFlow';
@@ -1201,7 +1177,9 @@ async function connectDB() {
   }
 }
 
-// ─── SYNC ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  SYNC
+// ═══════════════════════════════════════════════════════════════
 async function syncAll() {
   try {
     const [c, s, u, v] = await Promise.all([
@@ -1221,13 +1199,15 @@ async function syncAll() {
     renderDashboard();
     populateSelects();
     toast('¡Sincronizado!', 'success');
-  } catch (e) { toast('Error al sincronizar', 'error'); }
+  } catch (e) { toast('Error al sincronizar: ' + e.message, 'error'); }
 }
 
-// ─── USER PICKER ─────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  USER PICKER
+// ═══════════════════════════════════════════════════════════════
 function avatarColor(name) {
   let hash = 0;
-  for (let c of name) hash = c.charCodeAt(0) + ((hash << 5) - hash);
+  for (const c of String(name)) hash = c.charCodeAt(0) + ((hash << 5) - hash);
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
@@ -1242,7 +1222,7 @@ function renderUserPicker() {
   }
   grid.innerHTML = state.users.map((u, i) => {
     const color = avatarColor(u.name);
-    const initial = u.name.charAt(0).toUpperCase();
+    const initial = String(u.name).charAt(0).toUpperCase();
     const roleLabel = u.role === 'admin' ? 'Admin' : 'Cajero';
     return `<button class="user-pick-card" onclick="selectUser(${i})">
       <div class="user-pick-avatar" style="background:${color}">${initial}</div>
@@ -1253,73 +1233,163 @@ function renderUserPicker() {
 }
 
 function selectUser(index) {
-  state.selectedUser = state.users[index];
+  const u = state.users[index];
+  if (!u) return;                  // ← BUG FIX: guard against stale index
+  state.selectedUser = u;
   state.pin = '';
-  // Update PIN card header
-  const u = state.selectedUser;
+  state.pinLocked = false;
+
   const color = avatarColor(u.name);
-  document.getElementById('pin-selected-avatar').style.background = color;
-  document.getElementById('pin-selected-avatar').textContent = u.name.charAt(0).toUpperCase();
+  const el = document.getElementById('pin-selected-avatar');
+  el.style.background = color;
+  el.textContent = String(u.name).charAt(0).toUpperCase();
   document.getElementById('pin-selected-name').textContent = u.name;
   document.getElementById('pin-selected-role').textContent = u.role === 'admin' ? 'Administrador' : 'Cajero / Vendedor';
   document.getElementById('pin-error').textContent = '';
-  document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled'));
-  // Switch steps
+
+  // Clear dots
+  document.querySelectorAll('.pin-dot').forEach(d => {
+    d.classList.remove('filled', 'error-state');
+  });
+
   document.getElementById('step-pick').style.display = 'none';
-  document.getElementById('step-pin').style.display = 'block';
+  document.getElementById('step-pin').style.display  = 'flex';
+  document.getElementById('step-pin').style.flexDirection = 'column';
 }
 
 function backToUserPicker() {
   state.selectedUser = null;
   state.pin = '';
+  state.pinLocked = false;
   document.getElementById('pin-error').textContent = '';
-  document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled'));
+  document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled', 'error-state'));
   document.getElementById('step-pin').style.display = 'none';
   document.getElementById('step-pick').style.display = 'block';
 }
 
-// ─── PIN ENTRY ────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  PIN ENTRY  —  MAIN BUG FIXES HERE
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * FIX 1: pressKey checks pinLocked so keys pressed during
+ *         the 120ms timeout don't accumulate.
+ */
 function pressKey(n) {
-  if (!state.selectedUser) return;
-  if (state.pin.length < 4) {
-    state.pin += n;
-    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('filled', i < state.pin.length));
-    if (state.pin.length === 4) setTimeout(attemptLogin, 120);
+  if (!state.selectedUser || state.pinLocked) return;
+  if (state.pin.length >= 4) return;
+
+  state.pin += String(n);
+  updateDots();
+
+  if (state.pin.length === 4) {
+    state.pinLocked = true;          // lock input while validating
+    showPinLoading();
+    setTimeout(attemptLogin, 220);   // slightly longer for visible feedback
   }
 }
 
-function clearPin() {
-  state.pin = '';
-  document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled'));
-  document.getElementById('pin-error').textContent = '';
+/**
+ * FIX 2: ⌫ deletes ONLY the last digit (was clearing all before).
+ */
+function deleteLastDigit() {
+  if (state.pinLocked) return;
+  if (state.pin.length > 0) {
+    state.pin = state.pin.slice(0, -1);
+    document.getElementById('pin-error').textContent = '';
+    updateDots();
+  }
 }
 
+/**
+ * FIX 3: ✕ clears ALL digits.
+ */
+function clearPin() {
+  if (state.pinLocked) return;
+  state.pin = '';
+  document.getElementById('pin-error').textContent = '';
+  updateDots();
+}
+
+function updateDots() {
+  document.querySelectorAll('.pin-dot').forEach((d, i) => {
+    d.classList.toggle('filled', i < state.pin.length);
+    d.classList.remove('error-state');
+  });
+}
+
+function showPinLoading() {
+  const status = document.getElementById('pin-status');
+  status.innerHTML = `<div class="pin-loading"><span></span><span></span><span></span></div>`;
+}
+
+function hidePinLoading() {
+  document.getElementById('pin-status').innerHTML =
+    `<p id="pin-error" style="text-align:center; font-size:12px; color:var(--red);"></p>`;
+}
+
+/**
+ * FIX 4: PIN comparison normalises both values (trim + toString)
+ *         to handle numbers stored in Sheets or accidental whitespace.
+ */
 function attemptLogin() {
+  hidePinLoading();
+
   const u = state.selectedUser;
-  if (!u) return;
-  if (String(u.pin) === state.pin) {
+  if (!u) {
+    state.pinLocked = false;
+    return;
+  }
+
+  // Normalise: Google Sheets may return PIN as number or with whitespace
+  const storedPin = String(u.pin ?? '').trim();
+  const enteredPin = state.pin.trim();
+
+  if (storedPin === enteredPin) {
+    // ✅ SUCCESS
     state.user = u;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'grid';
-    // Populate sidebar user info
+
     const color = avatarColor(u.name);
-    document.getElementById('user-avatar-text').style.background = color;
-    document.getElementById('user-avatar-text').textContent = u.name.charAt(0).toUpperCase();
+    const avatar = document.getElementById('user-avatar-text');
+    avatar.style.background = color;
+    avatar.textContent = String(u.name).charAt(0).toUpperCase();
     document.getElementById('current-user-name').textContent = u.name;
-    document.getElementById('current-user-role').textContent = u.role === 'admin' ? 'Administrador' : 'Cajero / Vendedor';
-    // Build dynamic nav
+    document.getElementById('current-user-role').textContent =
+      u.role === 'admin' ? 'Administrador' : 'Cajero / Vendedor';
+
     buildNav(u.role);
     document.getElementById('mobile-nav').style.display = 'block';
     syncAll();
   } else {
-    document.getElementById('pin-error').textContent = 'PIN incorrecto';
-    clearPin();
-    document.getElementById('step-pin').style.animation = 'none';
-    setTimeout(() => { document.getElementById('step-pin').style.animation = ''; }, 10);
+    // ❌ WRONG PIN
+    state.pinLocked = false;
+    state.pin = '';
+
+    // Flash dots red then shake
+    document.querySelectorAll('.pin-dot').forEach(d => {
+      d.classList.remove('filled');
+      d.classList.add('error-state');
+    });
+
+    const card = document.getElementById('step-pin');
+    card.classList.remove('shake');
+    void card.offsetWidth; // reflow to restart animation
+    card.classList.add('shake');
+
+    document.getElementById('pin-error').textContent = 'PIN incorrecto — inténtalo de nuevo';
+
+    // Clear error-state dots after animation
+    setTimeout(() => {
+      document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('error-state'));
+    }, 600);
   }
 }
 
-// ─── DYNAMIC NAV ─────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  DYNAMIC NAV
+// ═══════════════════════════════════════════════════════════════
 const NAV_ITEMS = [
   { id:'clients', icon:'👥', label:'Clientes & Acumulados', short:'Clientes', roles:['admin','cajero'] },
   { id:'sales',   icon:'🛍️', label:'Ventas',               short:'Ventas',   roles:['admin','cajero'] },
@@ -1333,10 +1403,9 @@ function buildNav(role) {
   const general = allowed.filter(n => ['clients','sales','visits'].includes(n.id));
   const adm     = allowed.filter(n => ['admin','users'].includes(n.id));
 
-  // Sidebar
   let html = `<div class="nav-section"><div class="nav-section-label">Principal</div>`;
-  general.forEach((n,i) => {
-    html += `<button class="nav-btn${i===0?' active':''}" data-view="${n.id}" onclick="showView('${n.id}',this)">
+  general.forEach((n, i) => {
+    html += `<button class="nav-btn${i === 0 ? ' active' : ''}" data-view="${n.id}" onclick="showView('${n.id}',this)">
       <span class="nav-icon">${n.icon}</span> ${n.label}</button>`;
   });
   html += `</div>`;
@@ -1350,12 +1419,11 @@ function buildNav(role) {
   }
   document.getElementById('sidebar-nav').innerHTML = html;
 
-  // Mobile nav
   const mItems = allowed.filter(n => n.id !== 'users');
   const half   = Math.floor(mItems.length / 2);
   let mhtml    = '';
-  mItems.slice(0, half).forEach((n,i) => {
-    mhtml += `<button class="mobile-nav-btn${i===0?' active':''}" data-view="${n.id}" onclick="showView('${n.id}',this);setMobileActive(this)">
+  mItems.slice(0, half).forEach((n, i) => {
+    mhtml += `<button class="mobile-nav-btn${i === 0 ? ' active' : ''}" data-view="${n.id}" onclick="showView('${n.id}',this);setMobileActive(this)">
       <span class="icon">${n.icon}</span>${n.short}</button>`;
   });
   mhtml += `<button class="mobile-nav-btn" onclick="openModal('modal-sale')">
@@ -1367,7 +1435,9 @@ function buildNav(role) {
   document.getElementById('mobile-nav-inner').innerHTML = mhtml;
 }
 
-// ─── VIEWS ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  VIEWS
+// ═══════════════════════════════════════════════════════════════
 const viewMeta = {
   clients:['Clientes & Acumulados','Gestiona tus clientes y deudas'],
   sales:  ['Ventas','Historial y registro de ventas'],
@@ -1391,151 +1461,199 @@ function setMobileActive(btn) {
   btn.classList.add('active');
 }
 
-// ─── MODALS ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════════════════════
 function openModal(id) {
   document.getElementById(id).classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   document.body.style.overflow = '';
 }
 
-// Close on backdrop click
 document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
   backdrop.addEventListener('click', e => {
     if (e.target === backdrop) closeModal(backdrop.id);
   });
 });
 
-// ─── CLIENTS ─────────────────────────────────────────────────────
+// Custom confirm dialog (replaces native browser confirm)
+function confirmAction(message, onConfirm) {
+  document.getElementById('confirm-msg').textContent = message;
+  const btn = document.getElementById('confirm-ok-btn');
+  // Clone to remove old listeners
+  const fresh = btn.cloneNode(true);
+  btn.parentNode.replaceChild(fresh, btn);
+  fresh.onclick = () => { closeModal('modal-confirm'); onConfirm(); };
+  openModal('modal-confirm');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER: CLIENTS
+// ═══════════════════════════════════════════════════════════════
 function renderClients() {
   const search = (document.getElementById('search-client').value || '').toLowerCase();
   const tbody = document.getElementById('table-clients');
   const filtered = state.clients.filter(c =>
-    (c.name||'').toLowerCase().includes(search) || (c.address||'').toLowerCase().includes(search)
+    (c.name||'').toLowerCase().includes(search) ||
+    (c.address||'').toLowerCase().includes(search)
   );
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">👥</div><p>No se encontraron clientes</p><small>${search?'Intenta con otro término':'Agrega tu primer cliente'}</small></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+      <div class="empty-icon">👥</div>
+      <p>No se encontraron clientes</p>
+      <small>${search ? 'Intenta con otro término' : 'Agrega tu primer cliente'}</small>
+    </div></td></tr>`;
     return;
   }
   tbody.innerHTML = filtered.map(c => {
-    const total=parseFloat(c.totalDebt||0), paid=parseFloat(c.totalPaid||0), resta=total-paid;
+    const total = parseFloat(c.totalDebt || 0);
+    const paid  = parseFloat(c.totalPaid || 0);
+    const resta = total - paid;
     return `<tr>
-      <td><div class="client-name-cell"><strong>${escHtml(c.name)}</strong>${c.phone?`<small>📞 ${escHtml(c.phone)}</small>`:''}</div></td>
-      <td style="font-size:12px;color:var(--text-muted);max-width:200px">${escHtml(c.address||'—')}</td>
-      <td class="mono" style="font-weight:600">${c.bookCount||0}</td>
+      <td><div class="client-name-cell">
+        <strong>${escHtml(c.name)}</strong>
+        ${c.phone ? `<small>📞 ${escHtml(c.phone)}</small>` : ''}
+      </div></td>
+      <td style="font-size:12px;color:var(--text-muted);max-width:200px">${escHtml(c.address || '—')}</td>
+      <td class="mono" style="font-weight:600">${c.bookCount || 0}</td>
       <td class="mono">$${total.toFixed(2)}</td>
       <td class="mono" style="color:var(--green)">$${paid.toFixed(2)}</td>
-      <td><span class="badge ${resta>0.01?'badge-debt':'badge-ok'}">${resta>0.01?'⚠':'✓'} $${resta.toFixed(2)}</span></td>
+      <td><span class="badge ${resta > 0.01 ? 'badge-debt' : 'badge-ok'}">
+        ${resta > 0.01 ? '⚠' : '✓'} $${resta.toFixed(2)}
+      </span></td>
     </tr>`;
   }).join('');
 }
 
-// ─── SALES ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  RENDER: SALES
+// ═══════════════════════════════════════════════════════════════
 function renderSales() {
   const search = (document.getElementById('search-sales')?.value || '').toLowerCase();
   const tbody  = document.getElementById('table-sales');
   const filtered = [...state.sales].reverse().filter(s =>
-    (s.customerName||'').toLowerCase().includes(search) ||
-    (s.sellerName||'').toLowerCase().includes(search)
+    (s.customerName || '').toLowerCase().includes(search) ||
+    (s.sellerName   || '').toLowerCase().includes(search)
   );
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🛍️</div><p>Sin ventas registradas</p><small>Las ventas aparecerán aquí</small></div></td></tr>`;
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
+      <div class="empty-icon">🛍️</div>
+      <p>Sin ventas registradas</p>
+      <small>Las ventas aparecerán aquí</small>
+    </div></td></tr>`;
     return;
   }
-
   tbody.innerHTML = filtered.map(s => {
-    const dt = s.date ? new Date(s.date).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'2-digit' }) : '—';
-    const imgSrc = s.screenshot || s.imageData || '';
+    const dt = s.date
+      ? new Date(s.date).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'2-digit' })
+      : '—';
+    const imgSrc  = s.screenshot || s.imageData || '';
     const imgCell = imgSrc
-      ? `<img class="img-thumb" src="${imgSrc}" alt="Captura" onclick="openLightbox('${imgSrc}')">`
+      ? `<img class="img-thumb" src="${escHtml(imgSrc)}" alt="Captura" onclick="openLightbox('${escHtml(imgSrc)}')">`
       : `<span style="color:var(--text-light); font-size:12px">—</span>`;
     return `<tr>
       <td class="mono" style="font-size:12px">${dt}</td>
-      <td><strong>${escHtml(s.customerName||'—')}</strong></td>
-      <td class="mono" style="color:var(--accent)">$${parseFloat(s.amount||0).toFixed(2)}</td>
-      <td class="mono" style="color:var(--green)">$${parseFloat(s.payment||0).toFixed(2)}</td>
+      <td><strong>${escHtml(s.customerName || '—')}</strong></td>
+      <td class="mono" style="color:var(--accent)">$${parseFloat(s.amount || 0).toFixed(2)}</td>
+      <td class="mono" style="color:var(--green)">$${parseFloat(s.payment || 0).toFixed(2)}</td>
       <td class="mono">${s.booksQty || 1}</td>
-      <td style="font-size:12px">${escHtml(s.sellerName||'—')}</td>
+      <td style="font-size:12px">${escHtml(s.sellerName || '—')}</td>
       <td>${imgCell}</td>
     </tr>`;
   }).join('');
 }
 
-// ─── VISITS ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  RENDER: VISITS
+// ═══════════════════════════════════════════════════════════════
 function renderVisits() {
   const container = document.getElementById('visits-container');
-  if (state.visits.length === 0) {
-    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🚐</div><p>Sin visitas agendadas</p><small>Agenda tu próxima visita a un proveedor</small></div>`;
+  if (!state.visits.length) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">🚐</div>
+      <p>Sin visitas agendadas</p>
+      <small>Agenda tu próxima visita a un proveedor</small>
+    </div>`;
     return;
   }
   container.innerHTML = state.visits.map(v => {
-    const dt = v.date ? new Date(v.date + 'T00:00:00').toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' }) : v.date;
+    const dt = v.date
+      ? new Date(v.date + 'T00:00:00').toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long' })
+      : v.date;
     return `<div class="visit-card">
       <button class="visit-delete" onclick="deleteRow('Visitas','${v.id}')">🗑</button>
       <div class="visit-date">📅 ${dt}${v.time ? ' · ' + v.time : ''}</div>
       <div class="visit-name">${escHtml(v.providerName)}</div>
       <div class="visit-loc">📍 <span>${escHtml(v.location || '—')}</span></div>
-      ${v.notes ? `<p style="font-size:12px; color:var(--text-muted); margin-top:10px; border-top:1px solid var(--border); padding-top:10px">${escHtml(v.notes)}</p>` : ''}
+      ${v.notes ? `<p style="font-size:12px;color:var(--text-muted);margin-top:10px;border-top:1px solid var(--border);padding-top:10px">${escHtml(v.notes)}</p>` : ''}
     </div>`;
   }).join('');
 }
 
-// ─── USERS ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  RENDER: USERS
+// ═══════════════════════════════════════════════════════════════
 function renderUsers() {
   document.getElementById('table-users').innerHTML = state.users.map(u => `
     <tr>
       <td><div style="display:flex;align-items:center;gap:10px">
-        <div style="width:32px;height:32px;border-radius:8px;background:${avatarColor(u.name)};display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:13px">${u.name.charAt(0).toUpperCase()}</div>
+        <div style="width:32px;height:32px;border-radius:8px;background:${avatarColor(u.name)};display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:13px">
+          ${String(u.name).charAt(0).toUpperCase()}
+        </div>
         <strong>${escHtml(u.name)}</strong>
       </div></td>
-      <td class="mono">${u.pin}</td>
-      <td><span class="badge ${u.role==='admin'?'badge-admin':'badge-staff'}">${u.role==='admin'?'⭐ Admin':'👤 Cajero'}</span></td>
+      <td class="mono">${escHtml(String(u.pin))}</td>
+      <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-staff'}">
+        ${u.role === 'admin' ? '⭐ Admin' : '👤 Cajero'}
+      </span></td>
       <td><button class="btn btn-danger btn-sm btn-icon" onclick="deleteRow('Usuarios','${u.id}')" title="Eliminar">🗑</button></td>
     </tr>`).join('');
 }
 
-// ─── DASHBOARD + CHART ───────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  DASHBOARD + CHART
+// ═══════════════════════════════════════════════════════════════
 function renderDashboard() {
-  const totalRev      = state.sales.reduce((a,b) => a+parseFloat(b.amount||0), 0);
-  const totalBooks    = state.clients.reduce((a,b) => a+parseInt(b.bookCount||0), 0);
-  const totalDebt     = state.clients.reduce((a,b) => a+(parseFloat(b.totalDebt||0)-parseFloat(b.totalPaid||0)), 0);
-  const activeClients = state.clients.filter(c => parseInt(c.bookCount||0)>0).length;
+  const totalRev      = state.sales.reduce((a, b) => a + parseFloat(b.amount || 0), 0);
+  const totalBooks    = state.clients.reduce((a, b) => a + parseInt(b.bookCount || 0), 0);
+  const totalDebt     = state.clients.reduce((a, b) => a + (parseFloat(b.totalDebt || 0) - parseFloat(b.totalPaid || 0)), 0);
+  const activeClients = state.clients.filter(c => parseInt(c.bookCount || 0) > 0).length;
 
   document.getElementById('adm-total-money').textContent   = `$${totalRev.toFixed(2)}`;
   document.getElementById('adm-total-books').textContent   = totalBooks;
   document.getElementById('adm-total-debt').textContent    = `$${totalDebt.toFixed(2)}`;
   document.getElementById('adm-total-clients').textContent = activeClients;
 
-  // Build monthly aggregation
   const monthly = {};
   state.sales.forEach(s => {
     if (!s.date) return;
     const d = new Date(s.date);
     if (isNaN(d)) return;
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    monthly[key] = (monthly[key]||0) + parseFloat(s.amount||0);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    monthly[key] = (monthly[key] || 0) + parseFloat(s.amount || 0);
   });
   if (!Object.keys(monthly).length) {
     const n = new Date();
-    monthly[`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`] = 0;
+    monthly[`${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}`] = 0;
   }
   const keys   = Object.keys(monthly).sort().slice(-8);
-  const labels = keys.map(k => { const [y,m]=k.split('-'); return new Date(y,m-1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}); });
+  const labels = keys.map(k => {
+    const [y, m] = k.split('-');
+    return new Date(y, m - 1).toLocaleDateString('es-MX', { month:'short', year:'2-digit' });
+  });
   const values = keys.map(k => monthly[k]);
 
-  // Safely destroy previous chart
-  if (state.chartInstance) { try { state.chartInstance.destroy(); } catch(e){} state.chartInstance = null; }
-
-  // Replace canvas node to guarantee a clean state
+  if (state.chartInstance) {
+    try { state.chartInstance.destroy(); } catch(e) {}
+    state.chartInstance = null;
+  }
   const oldCanvas = document.getElementById('chart-sales');
-  const wrap = oldCanvas.parentNode;
   const nc = document.createElement('canvas');
   nc.id = 'chart-sales';
-  wrap.replaceChild(nc, oldCanvas);
+  oldCanvas.parentNode.replaceChild(nc, oldCanvas);
 
   state.chartInstance = new Chart(nc.getContext('2d'), {
     type: 'bar',
@@ -1544,7 +1662,9 @@ function renderDashboard() {
       datasets: [{
         label: 'Ventas ($)',
         data: values,
-        backgroundColor: keys.map((_,i) => i===keys.length-1 ? 'rgba(200,105,42,0.85)' : 'rgba(200,105,42,0.22)'),
+        backgroundColor: keys.map((_, i) =>
+          i === keys.length - 1 ? 'rgba(200,105,42,0.85)' : 'rgba(200,105,42,0.22)'
+        ),
         borderColor: 'rgba(200,105,42,1)',
         borderWidth: 2, borderRadius: 8, borderSkipped: false
       }]
@@ -1552,10 +1672,20 @@ function renderDashboard() {
     options: {
       responsive: true, maintainAspectRatio: false,
       animation: { duration: 700, easing: 'easeOutQuart' },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}` } } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}` } }
+      },
       scales: {
-        x: { grid: { color: 'rgba(30,45,64,0.05)' }, ticks: { font: { family:'DM Sans', size:12 }, color:'#7a6f62' } },
-        y: { grid: { color: 'rgba(30,45,64,0.05)' }, ticks: { font: { family:'DM Mono', size:11 }, color:'#7a6f62', callback: v => '$'+v.toFixed(0) }, beginAtZero: true }
+        x: {
+          grid: { color: 'rgba(30,45,64,0.05)' },
+          ticks: { font: { family:'DM Sans', size:12 }, color:'#7a6f62' }
+        },
+        y: {
+          grid: { color: 'rgba(30,45,64,0.05)' },
+          ticks: { font: { family:'DM Mono', size:11 }, color:'#7a6f62', callback: v => '$' + v.toFixed(0) },
+          beginAtZero: true
+        }
       }
     }
   });
@@ -1567,7 +1697,9 @@ function populateSelects() {
     : '<option value="">— Sin clientes —</option>';
 }
 
-// ─── SAVE ACTIONS ─────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  SAVE ACTIONS
+// ═══════════════════════════════════════════════════════════════
 async function saveClient() {
   const name  = document.getElementById('cli-name').value.trim();
   const addr  = document.getElementById('cli-addr').value.trim();
@@ -1575,12 +1707,9 @@ async function saveClient() {
   const notes = document.getElementById('cli-notes').value.trim();
   if (!name) return toast('El nombre es obligatorio', 'error');
   try {
-    await api('write', { tab: 'Clientes', rows: [{ id: Date.now(), name, address: addr, phone, notes, totalDebt: 0, totalPaid: 0, bookCount: 0 }] });
+    await api('write', { tab:'Clientes', rows:[{ id:Date.now(), name, address:addr, phone, notes, totalDebt:0, totalPaid:0, bookCount:0 }] });
     closeModal('modal-client');
-    document.getElementById('cli-name').value = '';
-    document.getElementById('cli-addr').value = '';
-    document.getElementById('cli-phone').value = '';
-    document.getElementById('cli-notes').value = '';
+    ['cli-name','cli-addr','cli-phone','cli-notes'].forEach(id => document.getElementById(id).value = '');
     toast('Cliente agregado correctamente', 'success');
     syncAll();
   } catch (e) { toast('Error al guardar cliente', 'error'); }
@@ -1600,29 +1729,24 @@ async function saveSale() {
   if (!client) return toast('Cliente no encontrado', 'error');
 
   const screenshotData = state.imageData || url || '';
-
   try {
-    await api('write', { tab: 'Ventas', rows: [{
+    await api('write', { tab:'Ventas', rows:[{
       id: Date.now(), date: new Date().toISOString(),
       customerId: cid, customerName: client.name,
       amount, payment: paid, booksQty: qty,
       sellerName: state.user.name,
-      screenshot: screenshotData,
-      courier: cour, note
+      screenshot: screenshotData, courier: cour, note
     }] });
-
-    await api('updateRow', { tab: 'Clientes', idField: 'id', idValue: cid, updates: {
+    await api('updateRow', { tab:'Clientes', idField:'id', idValue:cid, updates:{
       totalDebt: parseFloat(client.totalDebt || 0) + amount,
       totalPaid: parseFloat(client.totalPaid || 0) + paid,
       bookCount: parseInt(client.bookCount || 0) + qty,
       preferredCourier: cour
     } });
-
     closeModal('modal-sale');
     removeImage();
-    document.getElementById('sale-amount').value = '0';
+    ['sale-amount','sale-qty'].forEach(id => document.getElementById(id).value = id.includes('qty') ? '1' : '0');
     document.getElementById('sale-paid').value = '0';
-    document.getElementById('sale-qty').value = '1';
     document.getElementById('sale-courier').value = '';
     document.getElementById('sale-ss-url').value = '';
     document.getElementById('sale-note').value = '';
@@ -1639,7 +1763,7 @@ async function saveVisit() {
   const notes = document.getElementById('vis-notes').value.trim();
   if (!name || !date) return toast('Nombre y fecha son obligatorios', 'error');
   try {
-    await api('write', { tab: 'Visitas', rows: [{ id: Date.now(), providerName: name, date, time, location: loc, notes }] });
+    await api('write', { tab:'Visitas', rows:[{ id:Date.now(), providerName:name, date, time, location:loc, notes }] });
     closeModal('modal-visit');
     ['vis-name','vis-date','vis-time','vis-loc','vis-notes'].forEach(id => document.getElementById(id).value = '');
     toast('¡Visita agendada!', 'success');
@@ -1653,9 +1777,9 @@ async function saveUser() {
   const role = document.getElementById('usr-role').value;
   if (!name || !pin) return toast('Nombre y PIN son obligatorios', 'error');
   if (pin.length !== 4 || !/^\d+$/.test(pin)) return toast('El PIN debe tener exactamente 4 dígitos', 'error');
-  if (state.users.find(u => u.pin === pin)) return toast('Este PIN ya está en uso', 'error');
+  if (state.users.find(u => String(u.pin).trim() === pin)) return toast('Este PIN ya está en uso', 'error');
   try {
-    await api('write', { tab: 'Usuarios', rows: [{ id: Date.now(), name, pin, role }] });
+    await api('write', { tab:'Usuarios', rows:[{ id:Date.now(), name, pin, role }] });
     closeModal('modal-user');
     document.getElementById('usr-name').value = '';
     document.getElementById('usr-pin').value = '';
@@ -1665,15 +1789,18 @@ async function saveUser() {
 }
 
 async function deleteRow(tab, id) {
-  if (!confirm('¿Seguro que deseas eliminar este registro?')) return;
-  try {
-    await api('deleteRow', { tab, idField: 'id', idValue: id });
-    toast('Registro eliminado', 'success');
-    syncAll();
-  } catch (e) { toast('Error al eliminar', 'error'); }
+  confirmAction('¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer.', async () => {
+    try {
+      await api('deleteRow', { tab, idField:'id', idValue:id });
+      toast('Registro eliminado', 'success');
+      syncAll();
+    } catch (e) { toast('Error al eliminar', 'error'); }
+  });
 }
 
-// ─── IMAGE HANDLING ───────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  IMAGE HANDLING
+// ═══════════════════════════════════════════════════════════════
 function handleImageSelect(input) {
   const file = input.files[0];
   if (!file) return;
@@ -1713,7 +1840,9 @@ if (dropZone) {
   });
 }
 
-// ─── LIGHTBOX ────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  LIGHTBOX
+// ═══════════════════════════════════════════════════════════════
 function openLightbox(src) {
   document.getElementById('lightbox-img').src = src;
   document.getElementById('lightbox').classList.add('open');
@@ -1722,12 +1851,14 @@ function closeLightbox() {
   document.getElementById('lightbox').classList.remove('open');
 }
 
-// ─── TOAST ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════════
 function toast(msg, type = 'info') {
-  const icons = { success: '✅', error: '❌', info: '📌' };
+  const icons = { success:'✅', error:'❌', info:'📌' };
   const t = document.createElement('div');
   t.className = `toast ${type}`;
-  t.innerHTML = `<span>${icons[type] || '📌'}</span> ${msg}`;
+  t.innerHTML = `<span>${icons[type] || '📌'}</span> ${escHtml(msg)}`;
   document.getElementById('toast-container').appendChild(t);
   setTimeout(() => {
     t.style.animation = 'toastOut 0.3s forwards';
@@ -1735,30 +1866,46 @@ function toast(msg, type = 'info') {
   }, 3500);
 }
 
-// ─── UTILS ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════════
 function escHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function resetDB() {
-  if (confirm('¿Cambiar la base de datos? Se cerrará la sesión actual.')) {
+  confirmAction('¿Cambiar la base de datos? Se cerrará la sesión actual.', () => {
     localStorage.removeItem('bf_url');
     location.reload();
-  }
+  });
 }
 
-// ─── KEYBOARD SUPPORT ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
   const loginVisible = document.getElementById('login-screen').style.display !== 'none';
-  const pinVisible   = document.getElementById('step-pin') && document.getElementById('step-pin').style.display !== 'none';
+  const pinStep      = document.getElementById('step-pin');
+  const pinVisible   = pinStep && pinStep.style.display !== 'none';
+
   if (loginVisible && pinVisible) {
-    if (e.key >= '0' && e.key <= '9') pressKey(e.key);
-    if (e.key === 'Backspace') clearPin();
-    if (e.key === 'Escape') backToUserPicker();
+    if (e.key >= '0' && e.key <= '9') { e.preventDefault(); pressKey(e.key); }
+    if (e.key === 'Backspace')         { e.preventDefault(); deleteLastDigit(); }
+    if (e.key === 'Delete')            { e.preventDefault(); clearPin(); }
+    if (e.key === 'Escape')            backToUserPicker();
   }
+
   if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-backdrop.open').forEach(m => { m.classList.remove('open'); document.body.style.overflow = ''; });
+    document.querySelectorAll('.modal-backdrop.open').forEach(m => {
+      m.classList.remove('open');
+      document.body.style.overflow = '';
+    });
     closeLightbox();
   }
 });
