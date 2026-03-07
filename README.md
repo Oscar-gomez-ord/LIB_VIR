@@ -1,6 +1,6 @@
 # LIB_VIR
 
-ingresar xon: // ╔══════════════════════════════════════════════════════════════╗
+ingresar con: // ╔══════════════════════════════════════════════════════════════╗
 // ║           BOOKFLOW — Google Apps Script Backend v2           ║
 // ║                                                              ║
 // ║  INSTRUCCIONES DE INSTALACIÓN:                               ║
