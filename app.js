@@ -41,11 +41,11 @@ const formatMoney = (amount) => {
   }).format(amount || 0);
 };
 
-// 4. INICIALIZACIÓN Y CARGA DE DATOS
+// INICIALIZACIÓN (FLUJO CORREGIDO)
 window.addEventListener('load', async () => {
   loadLocal();
   
-  // Event Listeners base para la Librería
+  // Event Listeners base
   const barcodeInput = document.getElementById('barcode-input');
   if(barcodeInput) {
     barcodeInput.addEventListener('keydown', e => {
@@ -59,14 +59,31 @@ window.addEventListener('load', async () => {
   const discountInput = document.getElementById('discount-input');
   if(discountInput) discountInput.addEventListener('input', updateCartUI);
 
+  setDefaultDates();
+
   // Lógica de ruteo inicial
   if (!state.config.scriptUrl) {
     showSetup();
   } else {
+    // 1. Mostrar pantalla de bloqueo por defecto mientras carga
     document.getElementById('setup-page').style.display = 'none';
     document.getElementById('main-app').style.display = 'none';
     document.getElementById('lock-screen').style.display = 'flex';
+    document.querySelector('.numpad').style.opacity = '0.5'; // Desactivar visualmente el teclado mientras sincroniza
     
+    // 2. Descargar base de datos obligatoriamente
+    await syncAll();
+    document.querySelector('.numpad').style.opacity = '1';
+
+    // 3. Validar si no hay usuarios en la base de datos (Instalación nueva)
+    if (state.users.length === 0) {
+      document.getElementById('lock-screen').style.display = 'none';
+      state.isFirstSetup = true;
+      openUserModal(null, true);
+    }
+  }
+});
+
     // Bloqueo visual durante sync inicial
     const numpad = document.querySelector('.numpad');
     if(numpad) numpad.style.opacity = '0.5'; 
