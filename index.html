@@ -72,26 +72,46 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 @keyframes bounce{from{transform:translateY(0);opacity:.5}to{transform:translateY(-8px);opacity:1}}
 
 /* APP LAYOUT */
-.app{display:grid;grid-template-columns:270px 1fr;height:100vh;overflow:hidden}
-.sidebar{background:var(--navy);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.app{display:grid;grid-template-columns:270px 1fr;height:100vh;overflow:hidden;transition:grid-template-columns .28s cubic-bezier(.4,0,.2,1)}
+.app.sidebar-collapsed{grid-template-columns:64px 1fr}
+.sidebar{background:var(--navy);display:flex;flex-direction:column;overflow:hidden;position:relative;transition:width .28s cubic-bezier(.4,0,.2,1)}
 .sidebar::before{content:'';position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(160deg,rgba(200,105,42,.08) 0%,transparent 60%);pointer-events:none}
-.sidebar-header{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
-.sidebar-logo{display:flex;align-items:center;gap:10px}
-.sidebar-logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.sidebar-logo-text{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff}
+.sidebar-header{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;min-height:68px}
+.sidebar-logo{display:flex;align-items:center;gap:10px;overflow:hidden}
+.sidebar-logo-icon{width:36px;height:36px;min-width:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.sidebar-logo-text{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;white-space:nowrap;transition:opacity .2s,transform .2s}
 .sidebar-logo-text span{color:var(--accent)}
-.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.sidebar-toggle{background:rgba(255,255,255,.08);border:none;border-radius:8px;width:30px;height:30px;min-width:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.6);font-size:16px;transition:var(--transition);flex-shrink:0}
+.sidebar-toggle:hover{background:rgba(255,255,255,.16);color:#fff}
+.sidebar-nav{flex:1;padding:16px 8px;overflow-y:auto;overflow-x:hidden}
 .nav-section{margin-bottom:8px}
-.nav-section-label{font-size:10px;font-weight:700;letter-spacing:1.2px;color:rgba(255,255,255,.3);text-transform:uppercase;padding:8px 12px 4px}
-.nav-btn{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:2px;width:100%;text-align:left;transition:var(--transition)}
+.nav-section-label{font-size:10px;font-weight:700;letter-spacing:1.2px;color:rgba(255,255,255,.3);text-transform:uppercase;padding:8px 12px 4px;white-space:nowrap;overflow:hidden;transition:opacity .2s}
+.nav-btn{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;margin-bottom:2px;width:100%;text-align:left;transition:var(--transition);white-space:nowrap;overflow:hidden;position:relative}
 .nav-btn:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
 .nav-btn.active{background:rgba(200,105,42,.18);color:#fff;border-left:3px solid var(--accent);padding-left:11px}
-.nav-btn .nav-icon{font-size:18px;width:22px;text-align:center}
-.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.08)}
-.user-pill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 14px}
-.user-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white}
-.user-info p{font-size:13px;font-weight:600;color:#fff}
-.user-info small{font-size:11px;color:rgba(255,255,255,.4)}
+.nav-btn .nav-icon{font-size:18px;min-width:22px;text-align:center}
+.nav-btn .nav-label{transition:opacity .18s,transform .18s;white-space:nowrap}
+.sidebar-footer{padding:12px 12px;border-top:1px solid rgba(255,255,255,.08);overflow:hidden}
+.user-pill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 10px;overflow:hidden}
+.user-avatar{width:32px;height:32px;min-width:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white}
+.user-info{overflow:hidden;transition:opacity .2s,max-width .2s}
+.user-info p{font-size:13px;font-weight:600;color:#fff;white-space:nowrap}
+.user-info small{font-size:11px;color:rgba(255,255,255,.4);white-space:nowrap}
+.sidebar-footer-btns{display:flex;gap:8px;margin-top:10px;transition:opacity .2s}
+/* Collapsed sidebar styles */
+.app.sidebar-collapsed .sidebar-logo-text{opacity:0;transform:translateX(-8px);pointer-events:none;width:0}
+.app.sidebar-collapsed .nav-section-label{opacity:0;pointer-events:none}
+.app.sidebar-collapsed .nav-label{opacity:0;transform:translateX(-8px);pointer-events:none;width:0;display:none}
+.app.sidebar-collapsed .nav-btn{padding:11px;justify-content:center;border-left:none!important}
+.app.sidebar-collapsed .nav-btn.active{border-left:none!important;padding-left:11px!important;border-radius:10px}
+.app.sidebar-collapsed .user-info{opacity:0;max-width:0;pointer-events:none}
+.app.sidebar-collapsed .sidebar-footer-btns{opacity:0;pointer-events:none;height:0;margin:0;overflow:hidden}
+.app.sidebar-collapsed .user-pill{justify-content:center}
+.app.sidebar-collapsed .sidebar-header{justify-content:center}
+/* Tooltip on collapsed nav */
+.app.sidebar-collapsed .nav-btn{position:relative}
+.app.sidebar-collapsed .nav-btn::after{content:attr(data-label);position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:var(--navy-light);color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.app.sidebar-collapsed .nav-btn:hover::after{opacity:1}
 .main{display:flex;flex-direction:column;overflow:hidden}
 .topbar{height:68px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 30px;flex-shrink:0}
 .topbar-left h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--navy)}
@@ -286,14 +306,22 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
 .lightbox-close:hover{background:rgba(255,255,255,.3)}
 
 /* MOBILE NAV */
-.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--navy);border-top:1px solid rgba(255,255,255,.1);padding:8px 4px 16px;z-index:500}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--navy);border-top:1px solid rgba(255,255,255,.1);padding:8px 4px 16px;z-index:500;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.mobile-nav.nav-hidden{transform:translateY(100%)}
 .mobile-nav-inner{display:flex;justify-content:space-around}
 .mobile-nav-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border-radius:10px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.45);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;transition:var(--transition);min-width:60px}
 .mobile-nav-btn .icon{font-size:20px}
 .mobile-nav-btn.active{color:var(--accent)}
+/* Floating show-nav button when nav is hidden */
+.nav-show-fab{display:none;position:fixed;bottom:16px;right:16px;z-index:501;background:var(--navy);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:44px;height:44px;align-items:center;justify-content:center;cursor:pointer;font-size:20px;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:var(--transition)}
+.nav-show-fab.visible{display:flex}
+.nav-show-fab:hover{background:var(--navy-light);transform:scale(1.08)}
+/* Padding adjustment when nav hidden */
+.app.nav-hidden-mode{padding-bottom:0}
+
 
 /* CHART */
-.chart-wrap{padding:20px;height:280px}
+.chart-wrap{padding:20px 20px 16px;height:320px;background:var(--surface)}
 
 /* HELPERS */
 .client-name-cell{display:flex;flex-direction:column;gap:2px}
@@ -642,6 +670,7 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
         <div class="sidebar-logo-icon">📚</div>
         <div class="sidebar-logo-text">Book<span>Flow</span></div>
       </div>
+      <button class="sidebar-toggle" onclick="toggleSidebar()" title="Colapsar menú" id="sidebar-toggle-btn">◀</button>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav"></nav>
     <div class="sidebar-footer">
@@ -652,7 +681,7 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
           <small id="current-user-role">-</small>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:10px">
+      <div class="sidebar-footer-btns" style="display:flex;gap:8px;margin-top:10px">
         <button class="btn btn-ghost btn-sm" style="flex:1;color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.1)" onclick="syncAll()">🔄 Sync</button>
         <button class="btn btn-danger btn-sm" style="flex:1" onclick="location.reload()">Salir</button>
       </div>
@@ -666,6 +695,7 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
         <p id="view-subtitle">Gestiona tus clientes y deudas</p>
       </div>
       <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" id="toggle-mobile-nav-btn" onclick="toggleMobileNav()" style="display:none" title="Mostrar/ocultar barra inferior">☰</button>
         <button class="btn btn-ghost btn-sm" onclick="syncAll()">🔄 Sincronizar</button>
         <button class="btn btn-danger btn-sm" onclick="location.reload()">Salir</button>
       </div>
@@ -844,6 +874,8 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
 <nav class="mobile-nav" id="mobile-nav" style="display:none">
   <div class="mobile-nav-inner" id="mobile-nav-inner"></div>
 </nav>
+<!-- FAB to re-show hidden nav -->
+<button class="nav-show-fab" id="nav-show-fab" onclick="toggleMobileNav()" title="Mostrar barra de navegación">☰</button>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -1148,6 +1180,10 @@ function attemptLogin() {
     document.getElementById('current-user-role').textContent = u.role === 'admin' ? 'Administrador' : 'Cajero / Vendedor';
     buildNav(u.role);
     document.getElementById('mobile-nav').style.display = 'block';
+    // Show mobile nav toggle button on small screens
+    if (window.innerWidth <= 768) {
+      document.getElementById('toggle-mobile-nav-btn').style.display = 'flex';
+    }
     syncAll();
   } else {
     state.pinLocked = false; state.pin = '';
@@ -1176,15 +1212,15 @@ function buildNav(role) {
   const adm     = allowed.filter(n => ['admin','users'].includes(n.id));
   let html = `<div class="nav-section"><div class="nav-section-label">Principal</div>`;
   general.forEach((n, i) => {
-    html += `<button class="nav-btn${i === 0 ? ' active' : ''}" data-view="${n.id}" onclick="showView('${n.id}',this)">
-      <span class="nav-icon">${n.icon}</span>${n.label}</button>`;
+    html += `<button class="nav-btn${i === 0 ? ' active' : ''}" data-view="${n.id}" data-label="${n.label}" onclick="showView('${n.id}',this)">
+      <span class="nav-icon">${n.icon}</span><span class="nav-label">${n.label}</span></button>`;
   });
   html += `</div>`;
   if (adm.length) {
     html += `<div class="nav-section"><div class="nav-section-label">Administración</div>`;
     adm.forEach(n => {
-      html += `<button class="nav-btn" data-view="${n.id}" onclick="showView('${n.id}',this)">
-        <span class="nav-icon">${n.icon}</span>${n.label}</button>`;
+      html += `<button class="nav-btn" data-view="${n.id}" data-label="${n.label}" onclick="showView('${n.id}',this)">
+        <span class="nav-icon">${n.icon}</span><span class="nav-label">${n.label}</span></button>`;
     });
     html += `</div>`;
   }
@@ -1203,6 +1239,9 @@ function buildNav(role) {
     mhtml += `<button class="mobile-nav-btn" data-view="${n.id}" onclick="showView('${n.id}',this);setMobileActive(this)">
       <span class="icon">${n.icon}</span>${n.short}</button>`;
   });
+  // Add hide-nav button at end
+  mhtml += `<button class="mobile-nav-btn" onclick="toggleMobileNav()" title="Ocultar barra">
+    <span class="icon">🔽</span><span style="font-size:9px">Ocultar</span></button>`;
   document.getElementById('mobile-nav-inner').innerHTML = mhtml;
 }
 
@@ -1505,19 +1544,71 @@ function renderDashboard() {
   const keys   = Object.keys(monthly).sort().slice(-8);
   const labels = keys.map(k => { const [y,m] = k.split('-'); return new Date(y,m-1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}); });
   const values = keys.map(k => monthly[k]);
+  const maxVal = Math.max(...values, 1);
+
   if (state.chartInstance) { try { state.chartInstance.destroy(); } catch(e) {} state.chartInstance = null; }
   const oldCanvas = document.getElementById('chart-sales');
   const nc = document.createElement('canvas'); nc.id = 'chart-sales';
   oldCanvas.parentNode.replaceChild(nc, oldCanvas);
+
   state.chartInstance = new Chart(nc.getContext('2d'), {
-    type:'bar',
-    data:{ labels, datasets:[{ label:'Ventas ($)', data:values,
-      backgroundColor: keys.map((_,i) => i===keys.length-1?'rgba(200,105,42,.85)':'rgba(200,105,42,.22)'),
-      borderColor:'rgba(200,105,42,1)', borderWidth:2, borderRadius:8, borderSkipped:false }] },
-    options:{ responsive:true, maintainAspectRatio:false, animation:{duration:700,easing:'easeOutQuart'},
-      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` $${ctx.parsed.y.toFixed(2)}`}} },
-      scales:{ x:{grid:{color:'rgba(30,45,64,.05)'},ticks:{font:{family:'DM Sans',size:12},color:'#7a6f62'}},
-               y:{grid:{color:'rgba(30,45,64,.05)'},ticks:{font:{family:'DM Mono',size:11},color:'#7a6f62',callback:v=>'$'+v.toFixed(0)},beginAtZero:true} } }
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Ventas ($)',
+        data: values,
+        backgroundColor: values.map((v, i) => {
+          const isLast = i === values.length - 1;
+          const intensity = 0.35 + 0.65 * (v / maxVal);
+          return isLast
+            ? `rgba(200,105,42,${intensity})`
+            : `rgba(200,105,42,${intensity * 0.7})`;
+        }),
+        borderColor: values.map((_, i) =>
+          i === values.length - 1 ? 'rgba(200,105,42,1)' : 'rgba(200,105,42,0.8)'
+        ),
+        borderWidth: 2,
+        borderRadius: 10,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 800, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(30,45,64,0.95)',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,0.8)',
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: {
+            label: ctx => ` $${ctx.parsed.y.toLocaleString('es-MX', {minimumFractionDigits:2})}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { font: { family:'DM Sans', size:12, weight:'600' }, color:'#7a6f62', padding: 6 }
+        },
+        y: {
+          grid: { color: 'rgba(30,45,64,0.07)', drawTicks: false },
+          border: { display: false, dash: [4,4] },
+          ticks: {
+            font: { family:'DM Mono', size:11 },
+            color: '#7a6f62',
+            padding: 10,
+            callback: v => v >= 1000 ? '$' + (v/1000).toFixed(0) + 'k' : '$' + v.toFixed(0)
+          },
+          beginAtZero: true
+        }
+      }
+    }
   });
 }
 
@@ -1936,7 +2027,35 @@ function escHtml(str) {
   if (str == null) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-function resetDB() {
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR & NAV TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleSidebar() {
+  const app = document.getElementById('app');
+  const btn = document.getElementById('sidebar-toggle-btn');
+  const collapsed = app.classList.toggle('sidebar-collapsed');
+  btn.textContent = collapsed ? '▶' : '◀';
+  btn.title = collapsed ? 'Expandir menú' : 'Colapsar menú';
+  // Redraw chart if admin panel is active (it needs resize)
+  if (document.getElementById('view-admin').classList.contains('active')) {
+    setTimeout(() => { if (state.chartInstance) state.chartInstance.resize(); }, 300);
+  }
+}
+
+function toggleMobileNav() {
+  const nav = document.getElementById('mobile-nav');
+  const fab = document.getElementById('nav-show-fab');
+  const hidden = nav.classList.toggle('nav-hidden');
+  if (hidden) {
+    fab.classList.add('visible');
+    document.querySelector('.app').style.paddingBottom = '0';
+  } else {
+    fab.classList.remove('visible');
+    document.querySelector('.app').style.paddingBottom = '';
+  }
+}
+
+
   // If no session yet (login screen visible), reset directly without confirm dialog
   const loginVisible = document.getElementById('login-screen').style.display !== 'none' ||
                        document.getElementById('setup-screen').style.display !== 'none';
