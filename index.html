@@ -2056,7 +2056,8 @@ function toggleMobileNav() {
 }
 
 
-  // If no session yet (login screen visible), reset directly without confirm dialog
+function resetDB() {
+  // Si no hay sesión activa (pantalla de login/setup visible), reset directo sin confirm
   const loginVisible = document.getElementById('login-screen').style.display !== 'none' ||
                        document.getElementById('setup-screen').style.display !== 'none';
   if (loginVisible) {
