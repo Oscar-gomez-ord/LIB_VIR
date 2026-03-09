@@ -188,7 +188,7 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
 .img-thumb:hover{transform:scale(1.1);box-shadow:var(--shadow)}
 
 /* MODAL */
-.modal-backdrop{position:fixed;inset:0;background:rgba(30,45,64,.45);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:var(--transition)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(30,45,64,.45);backdrop-filter:blur(6px);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:var(--transition)}
 .modal-backdrop.open{opacity:1;pointer-events:all}
 .modal{background:var(--surface);border-radius:18px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.95) translateY(10px);transition:var(--transition)}
 .modal-backdrop.open .modal{transform:scale(1) translateY(0)}
@@ -386,7 +386,15 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
       </div>
     </div>
     <button class="btn btn-primary" id="connect-btn" style="width:100%;padding:14px;font-size:15px" onclick="connectDB()">📚 Inicializar BookFlow</button>
-    <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--text-light)">Tus datos se guardan de forma segura en Google Sheets</p>
+    <div style="display:flex;align-items:center;gap:12px;margin:20px 0 16px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-size:12px;color:var(--text-light);white-space:nowrap">o sin servidor</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;padding:13px;font-size:14px;border:1.5px dashed var(--border2)" onclick="useLocalMode()">
+      💾 Usar modo local (sin Google Sheets)
+    </button>
+    <p style="text-align:center;margin-top:12px;font-size:11px;color:var(--text-light)">Modo local guarda los datos en este navegador · Los datos se pierden si limpias el caché</p>
   </div>
 </div>
 
@@ -401,7 +409,7 @@ select.form-control{background-image:url("data:image/svg+xml,%3Csvg xmlns='http:
     <p style="text-align:center;font-size:14px;color:var(--text-muted);margin-bottom:2px">¿Quién eres?</p>
     <div class="user-picker-grid" id="user-picker-grid"></div>
     <div style="text-align:center;margin-top:16px">
-      <button class="pin-step-back" style="font-size:11px;justify-content:center" onclick="resetDB()">⚙️ Cambiar base de datos</button>
+      <button class="pin-step-back" style="font-size:11px;justify-content:center" onclick="resetDB()">⚙️ Cambiar modo / base de datos</button>
     </div>
   </div>
   <div class="auth-card" id="step-pin" style="max-width:340px;display:none">
@@ -845,6 +853,7 @@ const AVATAR_COLORS = ['#c8692a','#1e2d40','#2d7a5f','#7c3d8a','#1a6fa8','#b5452
 
 let state = {
   url: localStorage.getItem('bf_url'),
+  mode: localStorage.getItem('bf_mode') || 'remote',   // 'remote' | 'local'
   user: null,
   selectedUser: null,
   pin: '',
@@ -853,17 +862,61 @@ let state = {
   sales: [],
   users: [],
   visits: [],
-  deliveries: [],        // NEW: Entregas tab
+  deliveries: [],
   imageData: null,
   chartInstance: null,
-  selectedExportClient: null   // NEW: client selected in autocomplete
+  selectedExportClient: null
 };
+
+// ═══════════════════════════════════════════════════════════
+//  LOCAL STORAGE API (modo sin servidor)
+// ═══════════════════════════════════════════════════════════
+const LS_KEY = tab => 'bf_tab_' + tab.toLowerCase();
+
+function localRead(tab) {
+  try { return { rows: JSON.parse(localStorage.getItem(LS_KEY(tab)) || '[]') }; }
+  catch(e) { return { rows: [] }; }
+}
+function localWrite(tab, rows) {
+  const existing = localRead(tab).rows;
+  rows.forEach(r => existing.push(r));
+  localStorage.setItem(LS_KEY(tab), JSON.stringify(existing));
+  return { ok: true };
+}
+function localUpdate(tab, idField, idValue, updates) {
+  const rows = localRead(tab).rows;
+  const idx  = rows.findIndex(r => String(r[idField]) === String(idValue));
+  if (idx !== -1) Object.assign(rows[idx], updates);
+  localStorage.setItem(LS_KEY(tab), JSON.stringify(rows));
+  return { ok: true };
+}
+function localDelete(tab, idField, idValue) {
+  const rows = localRead(tab).rows.filter(r => String(r[idField]) !== String(idValue));
+  localStorage.setItem(LS_KEY(tab), JSON.stringify(rows));
+  return { ok: true };
+}
+function localApi(action, body) {
+  if (action === 'read')      return localRead(body.tab);
+  if (action === 'write')     return localWrite(body.tab, body.rows);
+  if (action === 'updateRow') return localUpdate(body.tab, body.idField, body.idValue, body.updates);
+  if (action === 'deleteRow') return localDelete(body.tab, body.idField, body.idValue);
+  return { ok: true };
+}
 
 // ═══════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════
 (function init() {
-  if (state.url) {
+  if (state.mode === 'local') {
+    // Ensure default admin exists
+    const users = localRead('Usuarios').rows;
+    if (!users.length) {
+      localWrite('Usuarios', [{ id: '1', name: 'Admin', pin: '1234', role: 'admin' }]);
+    }
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    loadUsers();
+  } else if (state.url) {
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
     loadUsers();
@@ -872,23 +925,56 @@ let state = {
   }
 })();
 
+function useLocalMode() {
+  localStorage.setItem('bf_mode', 'local');
+  state.mode = 'local';
+  // Ensure default admin exists
+  const users = localRead('Usuarios').rows;
+  if (!users.length) {
+    localWrite('Usuarios', [{ id: '1', name: 'Admin', pin: '1234', role: 'admin' }]);
+  }
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  loadUsers();
+  setTimeout(() => toast('Modo local activado — PIN del Admin: 1234', 'success'), 200);
+}
+
 async function loadUsers() {
   try {
     const res = await api('read', { tab: 'Usuarios' });
     state.users = Array.isArray(res.rows) ? res.rows : [];
+    // Guard: if remote mode returned empty, create default admin
+    if (!state.users.length && state.mode === 'remote') {
+      try {
+        await api('write', { tab:'Usuarios', rows:[{ id:String(Date.now()), name:'Admin', pin:'1234', role:'admin' }] });
+        const res2 = await api('read', { tab:'Usuarios' });
+        state.users = res2.rows || [];
+      } catch(_) {}
+    }
     renderUserPicker();
   } catch (e) {
-    localStorage.removeItem('bf_url');
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('setup-screen').style.display = 'flex';
-    setTimeout(() => toast('No se pudo conectar — verifica la URL del script', 'error'), 300);
+    if (state.mode === 'remote') {
+      localStorage.removeItem('bf_url');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('setup-screen').style.display = 'flex';
+      setTimeout(() => toast('No se pudo conectar — verifica la URL del script', 'error'), 300);
+    } else {
+      renderUserPicker();
+    }
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  API
+async function retryLoadUsers() {
+  const grid = document.getElementById('user-picker-grid');
+  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px">
+    <div class="pin-loading" style="justify-content:center"><span></span><span></span><span></span></div>
+    <p style="margin-top:10px;font-size:13px;color:var(--text-muted)">Conectando...</p>
+  </div>`;
+  await loadUsers();
+}
 // ═══════════════════════════════════════════════════════════
 async function api(action, body) {
+  if (state.mode === 'local') return localApi(action, body);
   let url;
   if (action === 'read') {
     url = `${state.url}?action=read&tab=${encodeURIComponent(body.tab)}`;
@@ -972,9 +1058,14 @@ function avatarColor(name) {
 function renderUserPicker() {
   const grid = document.getElementById('user-picker-grid');
   if (!state.users.length) {
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:13px">
-      No hay usuarios registrados.<br>
-      <button class="pin-step-back" style="margin-top:8px;justify-content:center" onclick="resetDB()">Reconectar</button>
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px 16px;color:var(--text-muted);font-size:13px">
+      <div style="font-size:36px;margin-bottom:10px">🔌</div>
+      <p style="font-weight:600;color:var(--text);margin-bottom:6px">No se encontraron usuarios</p>
+      <p style="margin-bottom:16px;font-size:12px">La base de datos está vacía o no respondió correctamente.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="retryLoadUsers()">🔄 Reintentar conexión</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetDB()">⚙️ Cambiar base de datos / modo</button>
+      </div>
     </div>`; return;
   }
   grid.innerHTML = state.users.map((u, i) => {
@@ -1846,8 +1937,19 @@ function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function resetDB() {
+  // If no session yet (login screen visible), reset directly without confirm dialog
+  const loginVisible = document.getElementById('login-screen').style.display !== 'none' ||
+                       document.getElementById('setup-screen').style.display !== 'none';
+  if (loginVisible) {
+    localStorage.removeItem('bf_url');
+    localStorage.removeItem('bf_mode');
+    location.reload();
+    return;
+  }
   confirmAction('¿Cambiar la base de datos? Se cerrará la sesión actual.', () => {
-    localStorage.removeItem('bf_url'); location.reload();
+    localStorage.removeItem('bf_url');
+    localStorage.removeItem('bf_mode');
+    location.reload();
   }, 'Sí, cambiar');
 }
 
